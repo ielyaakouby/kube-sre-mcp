@@ -9,7 +9,7 @@ Architecture: [architecture.md](architecture.md).
 
 ## Running kube-sre-mcp
 
-Requires Go 1.25+ to build. Cluster credentials via kubeconfig (`KUBECONFIG` or
+Requires Go 1.26.6+ to build. Cluster credentials via kubeconfig (`KUBECONFIG` or
 `~/.kube/config`). In-cluster ServiceAccount authentication is not supported.
 
 ```bash

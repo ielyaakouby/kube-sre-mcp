@@ -92,7 +92,7 @@ are bound to that context so a second call cannot silently target another cluste
 C:\Users\<USERNAME>\kube-sre-mcp\kube-sre-mcp-windows-amd64.exe
 ```
 
-Build from source (Go 1.25+):
+Build from source (Go 1.26.6+):
 
 ```powershell
 go build -trimpath -ldflags="-s -w -X kube-sre-mcp/internal/version.Version=0.1.0-beta.1" -o kube-sre-mcp-windows-amd64.exe ./cmd/kube-sre-mcp
