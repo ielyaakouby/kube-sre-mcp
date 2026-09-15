@@ -66,7 +66,7 @@ permissions as a healthy cluster.
 * Client `command` must be an **absolute path** to the binary.
 * Do not redirect stdout. JSON logs belong on stderr (the server already
   writes them there).
-* Container: `docker run -i` (stdin attached). There is no MCP port to curl.
+* If you run a locally built image, use `docker run -i` (stdin attached). There is no MCP port to curl. v1 does not publish an official image.
 
 See the `mcpServers` example in the root [README.md](../README.md).
 

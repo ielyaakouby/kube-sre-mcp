@@ -141,7 +141,7 @@ Details: [docs/architecture.md](docs/architecture.md). Documentation index: [doc
 
 ## Quick start
 
-Requires [Go 1.25+](https://go.dev/dl/) and a local kubeconfig (`KUBECONFIG` or `~/.kube/config`).
+Requires [Go 1.26.6+](https://go.dev/dl/) and a local kubeconfig (`KUBECONFIG` or `~/.kube/config`).
 
 ```bash
 git clone https://github.com/ielyaakouby/kube-sre-mcp.git
@@ -371,7 +371,7 @@ Pending-pod scheduling analysis is an **approximate eligibility check** against 
 | Make | `make build` → `./bin/kube-sre-mcp` |
 | Go | `go build -o bin/kube-sre-mcp ./cmd/kube-sre-mcp` |
 | Script | `bash install/install.sh` |
-| Container | `make docker-build` (image `kube-sre-mcp:0.1.0-beta.1` by default; mount a kubeconfig) |
+| GitHub Release | Official binaries on the [Releases](https://github.com/ielyaakouby/kube-sre-mcp/releases) page |
 
 ## Running locally
 
@@ -405,27 +405,9 @@ Compatible with normal Kubernetes workflows such as `kubectl config current-cont
 
 ## Docker
 
-```bash
-make docker-build
-# docker build --build-arg VERSION=0.1.0-beta.1 -t kube-sre-mcp:0.1.0-beta.1 .
-# docker build -t kube-sre-mcp:latest .
-# docker build --build-arg VERSION=0.1.0-beta.1 -t your-registry/kube-sre-mcp:0.1.0-beta.1 .
-```
+v1 does **not** publish an official container image (no GHCR or other registry). Official distribution is the local Go binary (source or GitHub Release).
 
-The image is distroless, non-root, and still an **stdio MCP** process. A client must attach stdin/stdout (or `docker run -i`). There is no MCP HTTP port.
-
-Running the image still requires a **mounted kubeconfig**. A Pod ServiceAccount token is not used for authentication.
-
-```bash
-docker run --rm -i \
-  -v "$HOME/.kube/config:/kube/config:ro" \
-  -e KUBECONFIG=/kube/config \
-  kube-sre-mcp:0.1.0-beta.1
-```
-
-Do not assume that placing this binary in a Kubernetes Pod authenticates via its ServiceAccount.
-
-In-cluster deployment using Kubernetes ServiceAccounts and remote MCP transport is planned for a future release.
+A `Dockerfile` remains in the repository for optional local builds (`make docker-build`). Any local image is still stdio MCP and still needs a **mounted kubeconfig**; ServiceAccount / in-cluster auth is not supported. Container publishing and in-cluster execution are planned for a future v2.
 
 ## Configuration
 

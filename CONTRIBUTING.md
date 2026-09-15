@@ -12,8 +12,8 @@ Unless explicitly stated otherwise, contributions are provided under the Apache 
 
 | Requirement | Notes |
 | --- | --- |
-| Go | **1.25+** (`go 1.25.0` in [go.mod](go.mod)) |
-| Docker | Optional. Needed only to build or test the image (`make docker-build`, `.github/workflows/docker.yml`). |
+| Go | **1.26.6+** (`go 1.26.6` in [go.mod](go.mod)) |
+| Docker | Optional. Local image builds only (`make docker-build`, `Dockerfile`). v1 does not publish images. |
 | Kubernetes cluster | **Not required** for unit tests. Tests use fake client-go objects under `internal/*`. A kubeconfig is required to **run** the server against a cluster. |
 
 Module path in Go is currently `kube-sre-mcp` (not the GitHub import path). Leave that unless a dedicated import-rewrite change is agreed.
@@ -26,7 +26,6 @@ Commands match the [Makefile](Makefile):
 make help
 make build          # ./bin/kube-sre-mcp
 make run            # go run ./cmd/kube-sre-mcp (stdio; needs kubeconfig)
-make docker-build   # kube-sre-mcp:0.1.0-beta.1 by default
 ```
 
 Equivalent without Make:
@@ -54,7 +53,7 @@ go vet ./...
 gofmt -l cmd internal
 ```
 
-CI (`.github/workflows/ci.yml`) runs format, vet, tests, and cross-platform builds on `main` and on pull requests targeting `main`. License, Docker, and security scans run in dedicated workflows under `.github/workflows/`.
+CI (`.github/workflows/ci.yml`) runs lint (`gofmt` + `go vet`), tests (including `-race`), a local binary build, `govulncheck ./...`, a non-publishing Docker image build, and license checks on pull requests and on pushes to `main`. Gosec and CodeQL run in dedicated workflows. There is no Docker/GHCR publishing workflow in v1.
 
 Do not add `fmt.Println` / stdout logging on the MCP runtime path. JSON logs belong on **stderr** so stdout stays MCP.
 

@@ -59,8 +59,8 @@ body:
     id: go_version
     attributes:
       label: Go version (if built from source)
-      description: "Output of go version. Leave blank if you used a pre-built binary or container image."
-      placeholder: "go1.25.x"
+      description: "Output of go version. Leave blank if you used a pre-built GitHub Release binary."
+      placeholder: "go1.26.x"
 
   - type: input
     id: os

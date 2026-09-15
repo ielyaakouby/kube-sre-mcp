@@ -3,10 +3,8 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
+  push:
     branches:
       - main
 
@@ -21,41 +19,26 @@ env:
   GOTOOLCHAIN: local
 
 jobs:
-  validate:
-    name: validate
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-
-      - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
-        with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Download modules
-        run: go mod download
-
-      - name: Verify go.mod / go.sum are tidy
-        run: |
-          go mod tidy
-          git diff --exit-code go.mod go.sum
-
   lint:
     name: lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Verify modules
+        run: |
+          go mod download
+          go mod verify
+          go mod tidy
+          git diff --exit-code go.mod go.sum
 
       - name: Lint
         run: make lint
@@ -66,10 +49,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
@@ -83,42 +66,65 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            artifact: kube-sre-mcp-linux-amd64
-          - goos: linux
-            goarch: arm64
-            artifact: kube-sre-mcp-linux-arm64
-          - goos: darwin
-            goarch: amd64
-            artifact: kube-sre-mcp-darwin-amd64
-          - goos: darwin
-            goarch: arm64
-            artifact: kube-sre-mcp-darwin-arm64
-          - goos: windows
-            goarch: amd64
-            artifact: kube-sre-mcp-windows-amd64.exe
+    timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
 
-      - name: Build ${{ matrix.artifact }}
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: "0"
-          ARTIFACT: ${{ matrix.artifact }}
-        run: |
-          mkdir -p bin
-          go build -trimpath -ldflags="-s -w -X kube-sre-mcp/internal/version.Version=0.1.0-beta.1" -o "bin/${ARTIFACT}" ./cmd/kube-sre-mcp
+      - name: Build
+        run: make build
+
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.1.0
+        with:
+          go-version-file: go.mod
+          go-package: ./...
+          repo-checkout: false
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@594f3bf4285d9ea8dc53c9a0c9c4092420091003 # v4.4.0
+
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: false
+          tags: kube-sre-mcp:ci
+          platforms: linux/amd64
+          build-args: |
+            VERSION=0.1.0-beta.1
+
+  license:
+    name: license
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Apache-2.0 and SPDX checks
+        run: make license-check

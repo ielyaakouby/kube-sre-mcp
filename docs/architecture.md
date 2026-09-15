@@ -183,10 +183,10 @@ shuts down when the MCP process exits.
 
 ## Deployment
 
-* Local binary on stdio is the supported runtime for this release.
-* Multi-stage **distroless** image (`Dockerfile`) may be used to distribute the binary. Mount a kubeconfig when Kubernetes access is required.
+* Local binary on stdio with kubeconfig authentication is the supported runtime for v1.
+* A `Dockerfile` is provided for optional local image builds. v1 does not publish images to GHCR or any other registry.
 * In-cluster ServiceAccount authentication is **not** supported in this release.
-* In-cluster deployment using Kubernetes ServiceAccounts and remote MCP transport is planned for a future release.
+* Container publishing and in-cluster execution are planned for a future v2.
 
 ## Non-Goals
 

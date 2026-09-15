@@ -9,11 +9,16 @@ updates:
       day: monday
     open-pull-requests-limit: 5
     groups:
+      # Kubernetes Go modules are tightly coupled.
+      # Keep automated updates within the current minor release.
+      # Upgrade Kubernetes minor versions explicitly and together.
       kubernetes:
         patterns:
-          - "k8s.io/*"
+          - "k8s.io/api"
+          - "k8s.io/apimachinery"
+          - "k8s.io/client-go"
+          - "k8s.io/metrics"
         update-types:
-          - minor
           - patch
       prometheus:
         patterns:
@@ -21,6 +26,11 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      - dependency-name: "k8s.io/*"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
 
   - package-ecosystem: github-actions
     directory: /

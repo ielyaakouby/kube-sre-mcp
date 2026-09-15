@@ -19,6 +19,7 @@ First public community beta. There are no earlier published versions.
 * Secret value protection: Secret `.data` is never returned; logs, events, and errors are redacted.
 * Optional guarded mutating actions (restart Deployment, scale workload, delete Pod, cordon/uncordon Node).
 * Official binaries for Linux (amd64, arm64), macOS (amd64, arm64), and Windows (amd64).
+* Official v1 distribution is local execution (source or GitHub Release binaries) with kubeconfig authentication. Docker images are not published.
 
 ### Security
 
