@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability (private)
+    url: https://github.com/ielyaakouby/kube-sre-mcp/security
+    about: Do not open a public issue for security reports. Use GitHub Private Vulnerability Reporting after it is enabled in repository settings. See SECURITY.md.
+  - name: Documentation
+    url: https://github.com/ielyaakouby/kube-sre-mcp/blob/main/docs/README.md
+    about: Usage, architecture, configuration, and troubleshooting.
