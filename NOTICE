@@ -1,0 +1,10 @@
+Kube SRE MCP
+Copyright 2026 The Kube SRE MCP Authors
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file distributed with this work for additional information.
+
+This repository does not vendor third-party Go modules. Dependencies are
+declared in go.mod and retain their original licenses. When redistributing
+compiled binaries, include any attribution and NOTICE text required by
+those dependencies.

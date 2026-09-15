@@ -1,0 +1,118 @@
+name: Feature request
+description: Propose a capability for kube-sre-mcp
+title: "[feat]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests help shape **kube-sre-mcp**. Prefer extending an existing MCP tool over adding a new one.
+
+        **Security reports do not belong here.** Use [SECURITY.md](https://github.com/ielyaakouby/kube-sre-mcp/blob/main/SECURITY.md) and [private vulnerability reporting](https://github.com/ielyaakouby/kube-sre-mcp/security).
+
+        New mutating behavior is security-sensitive. The MCP/LLM client is not an authorization authority; the Go server must enforce safety independently.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Proposal type
+      description: What kind of change are you asking for?
+      options:
+        - Diagnostic / read-only
+        - Recommendation
+        - Safe action (mutating)
+        - Observability
+        - Kubernetes resource support
+        - MCP protocol / integration
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What SRE or Kubernetes workflow is painful today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed capability
+      description: What should kube-sre-mcp do? Prefer a small, deterministic API over a generic kubectl-like primitive.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this belongs in kube-sre-mcp
+      description: Why should this live in the diagnostic/MCP server rather than kubectl, a controller, or an external tool?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Example Kubernetes scenario
+      description: Kind, namespace, and cluster situation. No credentials or Secret values.
+    validations:
+      required: true
+
+  - type: textarea
+    id: mcp_behavior
+    attributes:
+      label: Expected MCP behavior
+      description: Existing tool to extend, or a new tool only if reuse is impossible. Include expected JSON shape at a high level.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing tools in CATALOG.md, documentation-only changes, or client-side workarounds.
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security / RBAC implications
+      description: Which Kubernetes verbs would this need? Would recommended RBAC in deploy/rbac.md change?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mutation
+    attributes:
+      label: Diagnostic vs mutating capability
+      options:
+        - Read-only / diagnostic (no Kubernetes writes)
+        - Recommendation only (no writes)
+        - Mutating / safe action
+        - Mixed or unsure
+    validations:
+      required: true
+
+  - type: textarea
+    id: mutating_safety
+    attributes:
+      label: Mutating capability — required if this is a write
+      description: |
+        Skip if the proposal is read-only. For any new or expanded mutation, explain:
+
+        * risk and blast radius
+        * Kubernetes authorization (SSAR / least privilege)
+        * confirmation requirement (token bind, TTL, single use)
+        * UID revalidation and fail-closed behavior
+        * rollback / recovery expectations
+
+        Unrestricted primitives (generic kubectl, exec, arbitrary patch/apply/delete) are out of scope unless the project redesigns its threat model.
+      placeholder: "Risk: ... Blast radius: ... Authorization: ... Confirmation: ... Rollback: ..."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links to related issues, docs, or prior art.

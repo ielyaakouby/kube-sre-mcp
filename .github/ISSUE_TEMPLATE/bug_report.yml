@@ -1,0 +1,163 @@
+name: Bug report
+description: Report unexpected kube-sre-mcp behavior
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve **kube-sre-mcp**.
+
+        **Do not paste secrets.** Redact kubeconfig tokens, bearer tokens, Secret `.data`, private keys, cloud credentials, production passwords, and any similar material before submitting.
+
+        Security vulnerabilities must **not** be filed as public issues. See [SECURITY.md](https://github.com/ielyaakouby/kube-sre-mcp/blob/main/SECURITY.md) and use [GitHub Private Vulnerability Reporting](https://github.com/ielyaakouby/kube-sre-mcp/security) once it is enabled on the repository.
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: "I removed or redacted kubeconfig tokens, bearer tokens, Secret .data, private keys, cloud credentials, and other sensitive information."
+          required: true
+        - label: I can reproduce the issue with the latest published version or current main.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong? One or two paragraphs is enough.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: kube-sre-mcp version
+      description: "Output of kube-sre-mcp --version, or git commit SHA if built from source."
+      placeholder: "0.1.0-beta.1"
+    validations:
+      required: true
+
+  - type: input
+    id: go_version
+    attributes:
+      label: Go version (if built from source)
+      description: "Output of go version. Leave blank if you used a pre-built binary or container image."
+      placeholder: "go1.25.x"
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "Linux x86_64 / macOS 15 / Windows 11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mcp_client
+    attributes:
+      label: MCP client
+      options:
+        - Claude Desktop
+        - Claude Code
+        - Cursor
+        - VS Code / compatible MCP host
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: mcp_client_other
+    attributes:
+      label: MCP client details
+      description: If you selected Other, name the host and version.
+
+  - type: input
+    id: k8s_version
+    attributes:
+      label: Kubernetes version
+      description: "kubectl version (server), if relevant."
+      placeholder: "v1.31.x"
+
+  - type: input
+    id: k8s_distro
+    attributes:
+      label: Kubernetes distribution (if relevant)
+      description: For example kind, k3s, EKS, GKE, AKS, OpenShift, or self-managed.
+
+  - type: dropdown
+    id: kubeconfig_context
+    attributes:
+      label: kubeconfig context type
+      options:
+        - Local / kind / minikube / k3d
+        - Remote cluster (kubeconfig)
+        - Unknown
+        - Not applicable (server failed before Kubernetes access)
+
+  - type: input
+    id: resource
+    attributes:
+      label: Namespace / resource type
+      description: Kind and namespace of the resource you were diagnosing or mutating. Names only; no Secret values.
+      placeholder: "Deployment/web in namespace default"
+
+  - type: dropdown
+    id: actions_mode
+    attributes:
+      label: Read-only or actions enabled
+      options:
+        - Read-only (KUBE_SRE_MCP_ACTIONS_ENABLED=false or unset)
+        - Actions enabled (KUBE_SRE_MCP_ACTIONS_ENABLED=true)
+        - Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: mcp_tool
+    attributes:
+      label: Relevant MCP tool
+      description: Tool name from CATALOG.md if known (for example k8s_diagnose_resource).
+      placeholder: "k8s_diagnose_resource"
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Numbered steps. Prefer a throwaway cluster. Do not include credentials.
+      placeholder: |
+        1. Start kube-sre-mcp with ...
+        2. From the MCP client, call ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / output
+      description: "Redacted stderr JSON logs or MCP tool JSON. Never paste kubeconfig files, tokens, Secret .data, or private keys."
+      render: text
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Related PRs, CATALOG.md mismatch, environment variables (names and non-secret values only).
