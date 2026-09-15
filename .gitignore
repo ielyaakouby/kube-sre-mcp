@@ -1,0 +1,83 @@
+# Copyright 2026 The Kube SRE MCP Authors
+# SPDX-License-Identifier: Apache-2.0
+
+# --- Go build artifacts and binaries ---
+/bin/
+/dist/
+/kube-sre-mcp
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+vendor/
+
+# --- Test / coverage / profiles ---
+coverage.out
+coverage.html
+*.out
+*.cover
+*.prof
+cpu.prof
+mem.prof
+
+# --- Local environment (keep example files) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# --- Kubernetes / kubeconfig ---
+.kube/
+kubeconfig
+*.kubeconfig
+
+# --- Helm local overrides and packaged charts ---
+**/charts/*.tgz
+values.local.yaml
+values-*.local.yaml
+
+# --- Docker / local development ---
+.docker/
+
+# --- Secrets, credentials, certificates, private keys ---
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.p8
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.credentials
+credentials.json
+service-account.json
+
+# --- Temporary files, logs, caches ---
+tmp/
+/debug/
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+
+# --- Go workspace (local) ---
+go.work
+go.work.sum
+
+# --- IDE / editor ---
+.idea/
+.vscode/
+*.code-workspace
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+Desktop.ini
