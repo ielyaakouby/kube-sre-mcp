@@ -1,5 +1,8 @@
 # Copyright 2026 The Kube SRE MCP Authors
 # SPDX-License-Identifier: Apache-2.0
+#
+# Requires the repository Dependency graph (Settings → Code security).
+# YAML cannot enable that setting. Do not skip this check when the graph is off.
 name: Dependency Review
 
 on:

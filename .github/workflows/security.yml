@@ -26,7 +26,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Run gosec
-        uses: securego/gosec@deb54465fea23d19a77f037e11e6589021f8501d # v2.29.0
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          args: -exclude-generated ./...
+          go-version-file: go.mod
+          cache: true
+
+      # Run gosec as a Go binary so Dependabot PRs do not need to pull
+      # ghcr.io/securego/gosec (Docker container actions use GITHUB_TOKEN
+      # against GHCR; Dependabot tokens are read-only and often 403).
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@v2.29.0
+
+      - name: Run gosec
+        run: gosec -exclude-generated ./...
