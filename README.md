@@ -440,9 +440,24 @@ Index: **[docs/README.md](docs/README.md)**
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Open a pull request against `main` after `make check`.
+Kube SRE MCP is an open-source project built for the Kubernetes community, and contributions are welcome from everyone.
 
-Repository: [github.com/ielyaakouby/kube-sre-mcp](https://github.com/ielyaakouby/kube-sre-mcp). Issues: [github.com/ielyaakouby/kube-sre-mcp/issues](https://github.com/ielyaakouby/kube-sre-mcp/issues).
+Whether you are an SRE, Platform Engineer, DevOps Engineer, Go developer, Kubernetes user, security engineer, documentation contributor, or making your first open-source contribution, you are welcome to participate.
+
+You can help by:
+
+- fixing bugs
+- improving diagnostics and RCA
+- adding tests
+- improving documentation
+- suggesting SRE workflows
+- reporting issues
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get started. Open a pull request against `main` after `make check`.
+
+For substantial behavioral or architectural changes, please [open an issue](https://github.com/ielyaakouby/kube-sre-mcp/issues) first so the approach can be discussed with the community.
+
+Repository: [github.com/ielyaakouby/kube-sre-mcp](https://github.com/ielyaakouby/kube-sre-mcp).
 
 ## License
 
