@@ -1,6 +1,6 @@
-# kube-sre-mcp Documentation
+# Kube SRE MCP documentation
 
-kube-sre-mcp is a Go MCP server that diagnoses Kubernetes resources through
+Kube SRE MCP is a Go MCP server that diagnoses Kubernetes resources through
 deterministic analysis of API state. It does not embed an LLM. MCP clients
 provide natural-language interaction; this process returns structured evidence,
 ranked root-cause hypotheses, and (when explicitly enabled) a small set of

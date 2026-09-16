@@ -9,7 +9,8 @@ Architecture: [architecture.md](architecture.md).
 
 ## Running kube-sre-mcp
 
-Requires Go 1.26.6+ to build. Cluster credentials via kubeconfig (`KUBECONFIG` or
+Go 1.26.6+ is required **to build from source**. A GitHub Release binary does not
+need a Go toolchain. Cluster credentials via kubeconfig (`KUBECONFIG` or
 `~/.kube/config`). In-cluster ServiceAccount authentication is not supported.
 
 ```bash

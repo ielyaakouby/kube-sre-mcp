@@ -12,7 +12,7 @@ echo "======================================"
 echo ""
 
 if ! command -v go >/dev/null 2>&1; then
-  echo "ERROR: Go toolchain not installed (need Go 1.25+)."
+  echo "ERROR: Go toolchain not installed (need Go 1.26.6+; see go.mod)."
   exit 1
 fi
 echo "OK  $(go version)"
