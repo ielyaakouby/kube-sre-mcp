@@ -6,169 +6,367 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/ielyaakouby/kube-sre-mcp)](https://github.com/ielyaakouby/kube-sre-mcp/releases)
 
+[Features](#features) · [Getting Started](#getting-started) · [MCP Client Setup](#mcp-client-setup) · [Architecture](#architecture) · [Tools](#mcp-tools) · [Safety](#safety) · [Documentation](#documentation) · [Contributing](#contributing)
+
 **Kubernetes SRE & Diagnostic MCP Server**
 
-Kube SRE MCP is an open-source Model Context Protocol (MCP) server
-written in Go for Kubernetes diagnostics, observability,
-troubleshooting, root-cause analysis and safe operational actions.
+Native Go MCP server for Kubernetes diagnostics, troubleshooting, root-cause analysis, and safe operational actions.
 
-Kube SRE MCP helps MCP-compatible AI clients understand, diagnose and safely
-operate Kubernetes environments through structured Kubernetes-aware tools.
+**Pure Go** · **Kubernetes client-go** · **stdio MCP** · **kubeconfig** · **Kubernetes RBAC**
 
-**Go · Kubernetes · MCP · Apache-2.0**
+Kube SRE MCP is an open-source [Model Context Protocol](https://modelcontextprotocol.io/) server written natively in Go. It connects directly to the Kubernetes API with `client-go`. There is **no LLM inside this process** — the MCP host supplies reasoning. Kubernetes RBAC of the selected kubeconfig identity remains the authorization boundary.
 
-There is **no LLM inside this process**. The MCP host interprets the JSON.
-Kubernetes RBAC remains the authorization boundary.
+Kubernetes access gives an AI agent data. **Kube SRE MCP gives it SRE-grade diagnosis.**
 
-Kube SRE MCP is an independent open-source project built for the
-Kubernetes and cloud-native ecosystem. It is not a CNCF-hosted project
-and is not affiliated with the Apache Software Foundation.
+Observe → Inspect → Correlate → Diagnose → RCA → Recommend → Safely Act
 
-## Who it is for
+> **v1 runtime:** local process, **stdio only**, **kubeconfig only**. In-cluster ServiceAccount authentication, HTTP/SSE/Streamable HTTP MCP, and official container images are **not** supported. Details: [Architecture](#architecture).
 
-- Kubernetes administrators
-- SREs
-- Platform engineers
-- DevOps engineers
-- MCP clients that speak stdio MCP
+Kube SRE MCP is an independent open-source project. It is not a CNCF-hosted project and is not affiliated with the Apache Software Foundation.
 
 ## Why Kube SRE MCP
 
-An LLM with raw `kubectl` can list objects and paste YAML. It does not
-systematically correlate Events, logs, workload status, and dependencies, and
-it can mutate a cluster without preflight checks.
+A generic Kubernetes MCP server typically does this:
 
-Kube SRE MCP talks to the Kubernetes API with `client-go` (not by shelling out to
-`kubectl`) and is built for SRE workflows:
+```text
+LLM  →  list / get resource  →  raw YAML, logs, or events
+```
 
-- Kind-specific diagnostic analyzers (Pods, workloads, Services, Ingress, PVC, Nodes, plus generic CRDs)
-- Resource graph (owners, selectors, volumes, EndpointSlices, HPA/PDB links)
-- Event and log intelligence with central redaction
-- Correlation into ranked root-cause hypotheses (confidence and impact)
-- Cluster health inventory that treats RBAC gaps as `unknown`, not healthy
-- Write path: feature-flagged, SelfSubjectAccessReview, confirmation tokens, PDB/HPA/last-node guards
+That gives an agent Kubernetes **data**. It does not systematically correlate owners, selectors, Events, logs, status, and dependencies, and it may mutate a cluster without SRE-style preflight.
 
-## Key capabilities
+Kube SRE MCP does this:
 
-- **Go-only** MCP server, single static binary, **stdio** transport
-- **Kubernetes-aware** via typed, dynamic, and discovery clients
-- **Structured diagnostics** instead of opaque command output
-- **Event / log / metric correlation** when those APIs are reachable (`metrics.k8s.io` is optional)
-- **Controlled actions**: restart Deployment, scale workload, delete Pod, cordon/uncordon Node
-- **Secret safety**: Secret values are never returned; logs/events/errors are redacted
-- **Least privilege**: Kubernetes RBAC of the kubeconfig identity is the authorization boundary
+```text
+LLM / MCP host
+    →  Kube SRE MCP (pure Go, client-go)
+        →  collect Kubernetes signals
+        →  walk the resource graph
+        →  Events, logs, status, dependencies
+        →  optional metrics.k8s.io evidence
+        →  correlate independent evidence
+        →  ranked root-cause hypotheses
+        →  recommendations
+        →  controlled actions (off by default)
+    →  Kubernetes API server  →  Kubernetes RBAC
+```
+
+The server is **deterministic**: the same cluster state produces the same structured diagnosis. The MCP client may narrate that JSON; it does not change ranking.
+
+## See it in action
+
+<!-- Demo GIF can be added here in a future release -->
+
+**User**
+
+> Why is deployment payment-api unhealthy?
+
+**Kube SRE MCP** (via `k8s_diagnose_deployment` / `k8s_diagnose_resource`)
+
+1. Resolves the Deployment (kind aliases, optional prefix on **read** paths).
+2. Follows the current ReplicaSet and child Pods.
+3. Inspects workload and Pod status.
+4. Collects Events and failing-container logs (redacted).
+5. Checks graph dependencies (ConfigMaps, Secrets metadata, PVCs, imagePullSecrets, HPA/PDB links, …).
+6. Includes CPU/memory when `metrics.k8s.io` is reachable.
+7. Correlates evidence into ranked hypotheses and recommendations.
+
+**Illustrative result** (conceptual; not a captured JSON fixture):
+
+```text
+health:              critical
+root_cause.category: REGISTRY_AUTHENTICATION_FAILURE
+confidence:          high
+
+Evidence (examples of what the engine correlates):
+  • Image pull failed on child Pods
+  • Registry authentication rejected
+  • Repeated FailedPull / ErrImagePull Events
+
+recommended_actions:
+  Verify imagePullSecret on the Pod/ServiceAccount
+  (type kubernetes.io/dockerconfigjson).
+  Restart is not the default fix for image/auth/config/mount failures.
+```
+
+Health values returned by the engine: `healthy`, `degraded`, `critical`, `unknown`. Incomplete RBAC visibility is `unknown`, not healthy.
+
+More prompts: [docs/prompt-examples.md](docs/prompt-examples.md).
+
+## Features
+
+### SRE diagnostics
+
+- Kind-specific analyzers: Pod, Deployment, StatefulSet, DaemonSet, Job, CronJob, Service, Ingress, PVC, Node
+- Dedicated tools for Pod, Deployment, Service, and Node; other kinds go through `k8s_diagnose_resource`
+- Generic resources / CRDs via discovery and `status.conditions` (`diagnostic_depth: generic`)
+- Ranked root-cause hypotheses with confidence, impact, and evidence
+- Cluster health inventory with capped deep diagnosis of unhealthy candidates
+
+### Observability
+
+- Kubernetes Events (`k8s_get_events`)
+- Pod logs via the API, with failing-container auto-select and redaction (`k8s_get_logs`)
+- Optional pod/node metrics when the metrics API is installed (not a separate MCP tool)
+- Secret `.data` is never returned; logs, events, and errors are redacted
+
+### Kubernetes-aware correlation
+
+Bounded [resource graph](docs/resource-graph.md): owners, selectors, volumes, ConfigMaps/Secrets (metadata), ServiceAccounts, imagePullSecrets, EndpointSlices, Ingress backends, HPA, PDB, StorageClass/PV links.
+
+### Safe operations
+
+Read-only by default. When explicitly enabled: restart Deployment, scale Deployment/StatefulSet/ReplicaSet, delete Pod, cordon/uncordon Node.
+
+### Native Go implementation
+
+Implemented in **pure Go**. Talks to the Kubernetes API with `client-go` (typed, dynamic, and discovery clients).
+
+- Does **not** shell out to `kubectl` and does **not** wrap `kubectl`
+- Does **not** require `kubectl`, Node.js, or Python for its own Kubernetes operations
+- Does **not** embed an LLM
+- Distributed as a **native binary**; the MCP host provides the LLM side
 
 ## Architecture
 
-kube-sre-mcp currently runs locally and connects to Kubernetes using your existing kubeconfig. The Kubernetes identity and permissions are inherited directly from the selected kubeconfig context and enforced by Kubernetes RBAC.
-
-```text
-Current architecture — kubeconfig mode
-======================================
-
-Software version: 0.1.0-beta.1 (see internal/version; not an architecture label)
-
-Execution:
-  Local
-
-MCP transport:
-  stdio
-
-Kubernetes authentication:
-  kubeconfig
-
-Authorization:
-  Native Kubernetes RBAC associated with the kubeconfig identity
-
-In-cluster authentication:
-  Not supported in the current release
-```
-
-```text
-┌───────────────────────────────┐
-│ Claude / Cursor / MCP Client  │
-└───────────────┬───────────────┘
-                │
-              stdio
-                │
-                ▼
-┌───────────────────────────────┐
-│         kube-sre-mcp          │
-│                               │
-│ Kubernetes client-go          │
-└───────────────┬───────────────┘
-                │
-             kubeconfig
-                │
-                ▼
-┌───────────────────────────────┐
-│       kube-apiserver          │
-│                               │
-│ Kubernetes RBAC               │
-└───────────────────────────────┘
-```
-
 ```mermaid
 flowchart TD
-  Client["MCP client"] -->|stdio MCP| KM["Kube SRE MCP"]
-  KM --> Tools["MCP tool layer"]
-  Tools --> Health["Health"]
-  Tools --> Ev["Events"]
-  Tools --> Logs["Logs"]
-  Tools --> Inspect["Inspection"]
+  Host["MCP client / AI host"] -->|stdio| S["Kube SRE MCP — pure Go / client-go"]
+  S --> Tools["Tools"]
   Tools --> Diag["Diagnostics"]
-  Tools --> Act["Safe actions"]
   Diag --> Graph["Resource graph"]
-  Diag --> Sig["Signals"]
-  Sig --> Corr["Correlation / RCA"]
-  Corr --> Rec["Recommendations"]
-  Act --> SSAR["SelfSubjectAccessReview"]
-  Act --> Confirm["Confirmation store"]
-  Health --> Kube["Kubernetes client"]
-  Ev --> Kube
-  Logs --> Kube
-  Inspect --> Kube
-  Diag --> Kube
-  Act --> Kube
-  Kube -->|kubeconfig| API["Kubernetes API server"]
+  Diag --> Signals["Signals"]
+  Signals --> RCA["Correlation / RCA"]
+  RCA --> Rec["Recommendations"]
+  S -->|kubeconfig| API["Kubernetes API server"]
   API --> RBAC["Kubernetes RBAC"]
 ```
 
-Optional process metrics (Prometheus) can bind locally via `KUBE_SRE_MCP_METRICS_LISTEN`.
-That HTTP port is **not** an MCP transport.
+| v1 | Behavior |
+| --- | --- |
+| Execution | Local process |
+| MCP transport | **stdio only** |
+| Authentication | **kubeconfig only** (`KUBECONFIG` or `~/.kube/config`) |
+| Authorization | Kubernetes RBAC of that kubeconfig identity |
+| In-cluster / ServiceAccount auth | **Not supported** |
+| Official container image | **Not published** (a `Dockerfile` exists for optional local builds only) |
 
-Details: [docs/architecture.md](docs/architecture.md). Documentation index: [docs/README.md](docs/README.md).
+Optional Prometheus process metrics can bind locally via `KUBE_SRE_MCP_METRICS_LISTEN`. That HTTP port is **not** an MCP transport.
 
-## Quick start
+Package layout, timeouts, and non-goals: [docs/architecture.md](docs/architecture.md).
 
-Requires [Go 1.26.6+](https://go.dev/dl/) and a local kubeconfig (`KUBECONFIG` or `~/.kube/config`).
+## Getting Started
+
+### Requirements
+
+To **run a release binary**:
+
+- Reachable Kubernetes API
+- A usable local kubeconfig
+- An MCP client that can launch a local stdio process
+
+Go is **not** required to download and run a prebuilt binary.
+
+To **build from source**: [Go 1.26.6+](https://go.dev/dl/) (see `go.mod`).
+
+### Install from GitHub Release
+
+Official artifacts are native binaries on [Releases](https://github.com/ielyaakouby/kube-sre-mcp/releases):
+
+| File | Platform |
+| --- | --- |
+| `kube-sre-mcp-linux-amd64` | Linux amd64 |
+| `kube-sre-mcp-linux-arm64` | Linux arm64 |
+| `kube-sre-mcp-darwin-amd64` | macOS amd64 |
+| `kube-sre-mcp-darwin-arm64` | macOS arm64 |
+| `kube-sre-mcp-windows-amd64.exe` | Windows amd64 |
+| `checksums.txt` | SHA-256 sums |
+
+```bash
+chmod +x kube-sre-mcp-linux-amd64
+mv kube-sre-mcp-linux-amd64 kube-sre-mcp
+```
+
+Windows: [docs/windows.md](docs/windows.md).
+
+### Build from source
 
 ```bash
 git clone https://github.com/ielyaakouby/kube-sre-mcp.git
 cd kube-sre-mcp
-
 make build
-./bin/kube-sre-mcp --help
-./bin/kube-sre-mcp --version
 ```
 
-The server speaks MCP on **stdio** and logs JSON to stderr:
+Output: `./bin/kube-sre-mcp`. Equivalent: `go build -o bin/kube-sre-mcp ./cmd/kube-sre-mcp`.
+
+Optional helper (also a **source** build, not a release downloader): `bash install/install.sh` — [install/README.md](install/README.md).
+
+### Run
 
 ```bash
+export KUBECONFIG="$HOME/.kube/config"
 ./bin/kube-sre-mcp
 ```
 
-Equivalent:
+The process speaks MCP on **stdio** and writes JSON logs to **stderr**. It exits at startup if no usable kubeconfig is found.
 
 ```bash
-go run ./cmd/kube-sre-mcp
+./bin/kube-sre-mcp --version
+./bin/kube-sre-mcp --help
 ```
 
-From source installer: `bash install/install.sh` ([install/README.md](install/README.md)). Native Windows: [docs/windows.md](docs/windows.md).
+Optional: `KUBE_SRE_MCP_CONTEXT` selects a kubeconfig context; omit it to use `current-context`. Leave writes off until you intend to mutate (`KUBE_SRE_MCP_ACTIONS_ENABLED` defaults to `false`).
+
+A local Docker image (`make docker-build`) is still stdio MCP and still needs a **mounted kubeconfig**. It is not an official distribution channel.
+
+## MCP Client Setup
+
+**Transport: stdio only.** There is no HTTP, SSE, or Streamable HTTP MCP transport. Use an **absolute** path to the binary. Do not put cluster tokens in the config; point at a kubeconfig file.
+
+Keep `KUBE_SRE_MCP_ACTIONS_ENABLED=false` until you explicitly want mutating tools.
+
+`KUBE_SRE_MCP_CONTEXT` is optional. Omit it to use the kubeconfig `current-context`.
+
+### Cursor
+
+Project: `.cursor/mcp.json`. User: `~/.cursor/mcp.json`.
+
+```json
+{
+  "mcpServers": {
+    "kube-sre-mcp": {
+      "command": "/absolute/path/to/kube-sre-mcp",
+      "env": {
+        "KUBECONFIG": "/absolute/path/to/.kube/config",
+        "KUBE_SRE_MCP_LOG_LEVEL": "info",
+        "KUBE_SRE_MCP_ACTIONS_ENABLED": "false"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop / Claude Code
+
+The same stdio stanza works in Claude Desktop’s `mcpServers` config (for example `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS) and in Claude Code hosts that launch a local command.
+
+Windows paths and escaped backslashes: [docs/windows.md](docs/windows.md).
+
+### Generic stdio MCP client
+
+Any host that can spawn a local process and speak MCP on stdin/stdout can use the JSON above. Adapt the file location to your client.
+
+## Usage Examples
+
+Prefer **diagnose** when something is broken. Use find/get/list for inventory. Keep writes disabled until you confirm.
+
+### Read / diagnose
+
+```text
+Is my Kubernetes cluster healthy?
+Show unhealthy workloads in production.
+Why is pod <name> failing?
+Why is this pod in CrashLoopBackOff?
+Why is deployment <name> degraded?
+Show warning events for deployment <name>.
+Show recent errors from pod <name>.
+Find Deployment <name>; I don't know the namespace.
+Diagnose <resource> and include CPU and memory if metrics are available.
+```
+
+### Write (actions enabled)
+
+The first mutating call returns `confirmation_required`. Retry with `confirmation_id` only after the MCP host has obtained user approval.
+
+```text
+Restart deployment <name>.
+Scale deployment <name> to 5 replicas.
+Cordon node <name> for maintenance.
+```
+
+## MCP Tools
+
+Full schemas, arguments, RBAC, and examples: **[CATALOG.md](CATALOG.md)**.
+
+Tool identifiers are Kubernetes-oriented MCP names (`k8s_*`). They are **not** the product name.
+
+### Diagnostics
+
+| Tool | Mode | Purpose |
+| --- | --- | --- |
+| `k8s_diagnose_resource` | Diagnostic | Primary: diagnose any resource |
+| `k8s_diagnose_pod` | Diagnostic | Deep Pod diagnosis |
+| `k8s_diagnose_deployment` | Diagnostic | Deployment / ReplicaSet / Pod RCA |
+| `k8s_diagnose_service` | Diagnostic | Service, EndpointSlices, backends |
+| `k8s_diagnose_node` | Diagnostic | Node conditions, taints, events |
+
+### Inspection
+
+| Tool | Mode | Purpose |
+| --- | --- | --- |
+| `k8s_find_resource` | Read | Find by name across namespaces |
+| `k8s_get_resource` | Read | Summarized get (Secrets stripped) |
+| `k8s_list_resources` | Read | List a kind with selectors |
+
+### Observability
+
+| Tool | Mode | Purpose |
+| --- | --- | --- |
+| `k8s_get_logs` | Observability | Pod logs (redacted) |
+| `k8s_get_events` | Observability | Kubernetes Events |
+
+### Health and context
+
+| Tool | Mode | Purpose |
+| --- | --- | --- |
+| `k8s_cluster_health` | Diagnostic | Inventory and aggregated health |
+| `k8s_get_context` | Read | Current context / API server / namespace |
+| `k8s_list_contexts` | Read | kubeconfig contexts |
+
+### Actions
+
+| Tool | Mode | Purpose |
+| --- | --- | --- |
+| `k8s_restart_deployment` | Write | Rollout-restart a Deployment |
+| `k8s_scale_workload` | Write | Scale Deployment / StatefulSet / ReplicaSet |
+| `k8s_delete_pod` | Write | Delete a Pod |
+| `k8s_cordon_node` | Write | Cordon a Node |
+| `k8s_uncordon_node` | Write | Uncordon a Node |
+
+## Safety
+
+Kube SRE MCP is **read-only by default**. Mutating tools stay registered but return `status: disabled` unless `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
+
+**Kubernetes RBAC remains the final authorization boundary.** The server cannot grant itself extra power.
+
+Writes must still pass:
+
+1. Kubernetes RBAC on the API server
+2. SelfSubjectAccessReview (SSAR) allow for the verb
+3. Explicit two-step confirmation (single-use token, TTL)
+4. Confirmation bound to action, target, parameters, kubeconfig context, and object **UID**
+5. Safety guards where implemented: PDB with `disruptionsAllowed=0` (restart / delete Pod), HPA list failures fail closed (scale), last Ready schedulable Node (cordon), exact names (**no prefix match on writes**), plus refuse delete of mirror and control-plane Pods
+
+Server-side confirmation is **not** proof that a human approved the operation. The MCP host must obtain human approval before resubmitting the confirmation token and must not auto-submit IDs.
+
+Prefix match (`KUBE_SRE_MCP_PREFIX_MATCH`, default `true`) applies to **read** paths only. Ambiguous matches are listed, not guessed.
+
+Details: [docs/security.md](docs/security.md), [docs/safe-actions.md](docs/safe-actions.md), [deploy/rbac.md](deploy/rbac.md), [SECURITY.md](SECURITY.md).
+
+## How Diagnostics Work
+
+1. Resolve the resource (aliases, optional prefix, no silent guess on ambiguity).
+2. Build a bounded resource graph.
+3. Collect signals: status, Events, logs (failing container), dependencies, optional metrics.
+4. Correlate independent evidence.
+5. Rank likely root causes (confidence and impact).
+6. Generate recommendations (restart is not the default for image/auth/config/mount failures).
+7. Return health: `healthy` / `degraded` / `critical` / `unknown`.
+
+Pending-pod scheduling analysis is an **approximate eligibility check**, not a kube-scheduler simulation. See [docs/diagnostic-engine.md](docs/diagnostic-engine.md).
 
 ## Supported Platforms
 
-Official community release artifacts:
+Official community release artifacts (native Go binaries; no Node.js or Python runtime):
 
 | Platform | Architecture | Status |
 | --- | --- | --- |
@@ -178,247 +376,18 @@ Official community release artifacts:
 | macOS | arm64 | Supported |
 | Windows | amd64 | Supported |
 
-Release files: `kube-sre-mcp-linux-amd64`, `kube-sre-mcp-linux-arm64`, `kube-sre-mcp-darwin-amd64`, `kube-sre-mcp-darwin-arm64`, `kube-sre-mcp-windows-amd64.exe`, plus `checksums.txt`. Windows 386 is not an official download.
-
-## MCP client configuration
-
-**Transport: stdio only.** There is no HTTP, SSE, or Streamable HTTP MCP transport.
-
-Use an MCP host that can launch a local command and speak MCP on stdin/stdout.
-Adapt this `mcpServers` stanza to your client’s config file.
-
-`KUBE_SRE_MCP_CONTEXT` is **optional**. Omit it to use the kubeconfig `current-context`.
-
-```json
-{
-  "mcpServers": {
-    "kube-sre-mcp": {
-      "command": "/absolute/path/to/kube-sre-mcp",
-      "env": {
-        "KUBECONFIG": "/home/you/.kube/config",
-        "KUBE_SRE_MCP_LOG_LEVEL": "info",
-        "KUBE_SRE_MCP_ACTIONS_ENABLED": "false"
-      }
-    }
-  }
-}
-```
-
-Use an absolute path to the binary. Do not put cluster tokens in the config file;
-point at a kubeconfig file.
-
-## MCP tools
-
-Full schemas, RBAC, and examples: **[CATALOG.md](CATALOG.md)**.
-
-| Tool | Category | Mode | Purpose |
-| --- | --- | --- | --- |
-| `k8s_diagnose_resource` | Diagnostics | Diagnostic | Primary: diagnose any resource |
-| `k8s_diagnose_pod` | Diagnostics | Diagnostic | Deep Pod diagnosis |
-| `k8s_diagnose_deployment` | Diagnostics | Diagnostic | Deployment / ReplicaSet / Pod RCA |
-| `k8s_diagnose_service` | Diagnostics | Diagnostic | Service, EndpointSlices, backends |
-| `k8s_diagnose_node` | Diagnostics | Diagnostic | Node conditions, taints, events |
-| `k8s_find_resource` | Inspection | Read | Find by name across namespaces |
-| `k8s_get_resource` | Inspection | Read | Summarized get (Secrets stripped) |
-| `k8s_list_resources` | Inspection | Read | List a kind with selectors |
-| `k8s_get_logs` | Observability | Observability | Pod logs (redacted) |
-| `k8s_get_events` | Observability | Observability | Kubernetes Events |
-| `k8s_cluster_health` | Health | Diagnostic | Inventory and aggregated health |
-| `k8s_get_context` | Context | Read | Current context / API server / namespace |
-| `k8s_list_contexts` | Context | Read | kubeconfig contexts |
-| `k8s_restart_deployment` | Actions | Write / Action | Rollout-restart a Deployment |
-| `k8s_scale_workload` | Actions | Write / Action | Scale Deployment / StatefulSet / ReplicaSet |
-| `k8s_delete_pod` | Actions | Write / Action | Delete a Pod |
-| `k8s_cordon_node` | Actions | Write / Action | Cordon a Node |
-| `k8s_uncordon_node` | Actions | Write / Action | Uncordon a Node |
-
-Tool identifiers are Kubernetes-oriented MCP names (`k8s_*`). They are **not** the product name.
-
-## Usage examples
-
-Prefer **diagnose** when something is broken. Use find/get/list for inventory.
-Keep writes off until you explicitly confirm.
-
-More prompts: [docs/prompt-examples.md](docs/prompt-examples.md) and [docs/usage.md](docs/usage.md).
-
-### Cluster health
-
-```text
-Is my Kubernetes cluster healthy?
-```
-
-```text
-Show me unhealthy workloads in production.
-```
-
-### Troubleshooting
-
-```text
-Why is pod <pod-name> failing?
-```
-
-```text
-Why is this pod in CrashLoopBackOff?
-```
-
-### Events
-
-```text
-Show events for deployment <name> in namespace <namespace>.
-```
-
-### Logs
-
-```text
-Show recent errors from pod <name>.
-```
-
-### Metrics
-
-Metrics are **not** a separate MCP tool. When the metrics API is installed,
-diagnosis may include CPU/memory as supporting evidence (`metrics_available: false` otherwise).
-
-```text
-Diagnose <resource> and include CPU and memory usage if metrics exist.
-```
-
-### Resource inspection
-
-```text
-Describe deployment <name>.
-```
-
-```text
-Find Deployment <name> — I don't know the namespace.
-```
-
-### Actions
-
-Only with writes enabled. The first call returns `confirmation_required`;
-repeat with `confirmation_id` only after the MCP host has obtained user approval.
-kube-sre-mcp cannot guarantee that a human approved the second call.
-
-```text
-Restart deployment <name>.
-```
-
-```text
-Scale deployment <name> to 5 replicas.
-```
-
-```text
-Cordon node <name> for maintenance.
-```
-
-## Safety
-
-### READ-ONLY TOOLS
-
-Diagnostic, health, events, logs, and inspection tools only `get`/`list`
-(and read pod logs). They never patch or delete. Prefix match may apply on
-**read** paths when `KUBE_SRE_MCP_PREFIX_MATCH=true`.
-
-### MUTATING / WRITE TOOLS
-
-Five tools can modify the cluster:
-
-| Tool | Kubernetes mutation | Extra guards |
-| --- | --- | --- |
-| `k8s_restart_deployment` | Patch Deployment pod template annotation | PDB, restart-not-recommended categories, UID bind |
-| `k8s_scale_workload` | Patch `spec.replicas` | Max replicas, HPA fail-closed, UID bind |
-| `k8s_delete_pod` | Delete Pod | Mirror/control-plane refuse, PDB, unmanaged warning |
-| `k8s_cordon_node` | Patch Node `unschedulable=true` | Last Ready schedulable node refuse |
-| `k8s_uncordon_node` | Patch Node `unschedulable=false` | Confirmation + UID bind |
-
-They are **off** until `KUBE_SRE_MCP_ACTIONS_ENABLED=true`. If the flag is false, they return `status: disabled`.
-
-Kubernetes RBAC is the authorization boundary. Kube SRE MCP cannot grant itself extra power.
-
-Writes also require:
-
-1. SelfSubjectAccessReview allow for the verb
-2. A confirmation token bound to action, target, UID, context, and parameters (single-use, TTL)
-3. Preflight guards (PDB, HPA, last Ready schedulable node, exact names — no prefix match on writes)
-
-kube-sre-mcp uses a two-step confirmation protocol for mutating actions. The MCP host/client is responsible for presenting the confirmation request to the user and must not automatically submit confirmation IDs without user approval. Server-side confirmation is **not** proof of human interaction. Kubernetes RBAC remains the final authorization boundary.
-
-```
-MCP client
-    →  Kube SRE MCP (stdio)
-    →  kubeconfig identity
-    →  Kubernetes API server
-    →  Kubernetes RBAC (final allow/deny)
-```
-
-See [docs/security.md](docs/security.md), [docs/safe-actions.md](docs/safe-actions.md),
-[deploy/rbac.md](deploy/rbac.md), and [SECURITY.md](SECURITY.md).
-
-## How diagnostics work
-
-1. Resolve kind + name (aliases, optional prefix match, no silent guess on ambiguity).
-2. Get the object; walk a bounded resource graph.
-3. Collect signals: status, Events, logs (failing container), dependencies, optional metrics.
-4. Correlate independent evidence into ranked hypotheses.
-5. Map the top category to recommendations (restart is **not** the default for image/auth/config/mount failures).
-6. Report `healthy` / `degraded` / `critical` / `unknown`.
-
-Pending-pod scheduling analysis is an **approximate eligibility check** against listed Nodes (Ready, cordon, selectors, required nodeAffinity `metadata.name`, taints, requests vs allocatable). It is not a kube-scheduler simulation. Required pod anti-affinity and topology spread are reported as unsupported constraints with reduced certainty.
-
-## Installation
-
-| Method | Command |
-| --- | --- |
-| Make | `make build` → `./bin/kube-sre-mcp` |
-| Go | `go build -o bin/kube-sre-mcp ./cmd/kube-sre-mcp` |
-| Script | `bash install/install.sh` |
-| GitHub Release | Official binaries on the [Releases](https://github.com/ielyaakouby/kube-sre-mcp/releases) page |
-
-## Running locally
-
-Authentication is **kubeconfig only**. There is no ServiceAccount / in-cluster fallback.
-
-Resolution order:
-
-1. Explicit kubeconfig path already supported by the process (`KUBECONFIG`, including multiple paths with the OS list separator)
-2. Otherwise the default local kubeconfig (`~/.kube/config`)
-
-If no usable kubeconfig is found, the process exits before serving MCP.
-
-Optional: `KUBE_SRE_MCP_CONTEXT` to select a kubeconfig context. When unset, kube-sre-mcp uses the kubeconfig `current-context`. Leave writes disabled until you intend to mutate:
-
-```bash
-export KUBECONFIG="$HOME/.kube/config"
-export KUBE_SRE_MCP_LOG_LEVEL=info
-export KUBE_SRE_MCP_ACTIONS_ENABLED=false
-./bin/kube-sre-mcp
-```
-
-```bash
-KUBECONFIG=/path/to/config kube-sre-mcp
-```
-
-```bash
-KUBE_SRE_MCP_CONTEXT=production kube-sre-mcp
-```
-
-Compatible with normal Kubernetes workflows such as `kubectl config current-context` and `kubectl config get-contexts`.
-
-## Docker
-
-v1 does **not** publish an official container image (no GHCR or other registry). Official distribution is the local Go binary (source or GitHub Release).
-
-A `Dockerfile` remains in the repository for optional local builds (`make docker-build`). Any local image is still stdio MCP and still needs a **mounted kubeconfig**; ServiceAccount / in-cluster auth is not supported. Container publishing and in-cluster execution are planned for a future v2.
+Windows 386 and extra Makefile `build-all-extra` targets are not official downloads. Kubernetes connectivity and kubeconfig are still required.
 
 ## Configuration
 
-All settings are environment variables (no CLI flags except `--help` / `--version`). Full table: [docs/configuration.md](docs/configuration.md).
+All settings are environment variables (`--help` / `--version` only as flags). Full table: [docs/configuration.md](docs/configuration.md).
 
 | Variable | Default | Description |
 | --- | --- | --- |
 | `KUBECONFIG` | client-go default | kubeconfig path |
 | `KUBE_SRE_MCP_CONTEXT` | current context | kubeconfig context |
 | `KUBE_SRE_MCP_LOG_LEVEL` | `info` | `debug` / `info` / `warn` / `error` |
-| `KUBE_SRE_MCP_ACTIONS_ENABLED` | `false` | Enable mutating tools |
+| `KUBE_SRE_MCP_ACTIONS_ENABLED` | `false` | Enable mutating tools (`K8S_MCP_ACTIONS_ENABLED` is ignored) |
 | `KUBE_SRE_MCP_DIAGNOSTIC_TIMEOUT` | `45` | Per-tool timeout (seconds) |
 | `KUBE_SRE_MCP_API_TIMEOUT_SECONDS` | `15` | Kubernetes client timeout |
 | `KUBE_SRE_MCP_CONFIRMATION_TTL_SECONDS` | `120` | Action confirmation TTL |
@@ -437,53 +406,37 @@ make check
 make license-check
 ```
 
-Module path: `kube-sre-mcp`. Entry point: `cmd/kube-sre-mcp`. Version metadata: `internal/version` (override with `-ldflags "-X kube-sre-mcp/internal/version.Version=0.1.0-beta.1"`).
+Module path: `kube-sre-mcp`. Entry point: `cmd/kube-sre-mcp`. Version: `internal/version` (override with `-ldflags "-X kube-sre-mcp/internal/version.Version=0.1.0-beta.1"`).
 
-The Go module path is still the local name `kube-sre-mcp`, not `github.com/ielyaakouby/kube-sre-mcp`. Changing it would rewrite every import and is a separate decision.
+The Go module path is the local name `kube-sre-mcp`, not `github.com/ielyaakouby/kube-sre-mcp`.
 
-## Testing
+Tests under `internal/*` use fake client-go objects. A live cluster is not required for `make test`.
 
-Tests live under `internal/*` and use fake client-go objects. A live cluster is not required.
-
-```bash
-make test
-make test-race
-make test-cover
-```
-
-## Troubleshooting
-
-| Symptom | Likely cause | What to do |
-| --- | --- | --- |
-| Process exits at startup | No usable kubeconfig | Set `KUBECONFIG` or configure `~/.kube/config` |
-| `status: disabled` on writes | `KUBE_SRE_MCP_ACTIONS_ENABLED=false` | Enable only with matching RBAC. `K8S_MCP_ACTIONS_ENABLED` is ignored. |
-| `confirmation_required` | Expected first-step gate | Host should ask the user, then retry with `confirmation_id` |
-| `forbidden` | SSAR or API RBAC deny | Grant the verb in [deploy/rbac.md](deploy/rbac.md) |
-| Health `unknown` | Missing list/get permissions | Treat as incomplete visibility, not healthy |
-| Empty metrics in diagnosis | No metrics-server | Expected; `metrics_available: false` |
-| MCP client cannot start server | Relative `command` path | Use an absolute path to `bin/kube-sre-mcp` |
+Operators debugging the running server: [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Documentation
 
 Index: **[docs/README.md](docs/README.md)**
 
-- [docs/windows.md](docs/windows.md) — native Windows 10/11 setup
-- [docs/usage.md](docs/usage.md) — run the server and SRE workflows
-- [docs/architecture.md](docs/architecture.md) — process and package layout
-- [docs/diagnostic-engine.md](docs/diagnostic-engine.md) — RCA pipeline and capability matrix
-- [docs/resource-graph.md](docs/resource-graph.md) — ownership and dependency walks
-- [docs/security.md](docs/security.md) — runtime security architecture
-- [docs/safe-actions.md](docs/safe-actions.md) — mutating tools and confirmation
-- [docs/configuration.md](docs/configuration.md) — environment variables
-- [docs/troubleshooting.md](docs/troubleshooting.md) — operators debugging the server
-- [docs/prompt-examples.md](docs/prompt-examples.md) — prompt library
-- [CATALOG.md](CATALOG.md) — MCP tool contract
-- [deploy/rbac.md](deploy/rbac.md) — recommended Kubernetes permissions for the kubeconfig identity
-- [install/README.md](install/README.md) — build from source
-- [CONTRIBUTING.md](CONTRIBUTING.md) — development workflow
-- [CHANGELOG.md](CHANGELOG.md) — release history
-- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — community standards
-- [SECURITY.md](SECURITY.md) — vulnerability reporting
+| Doc | Topic |
+| --- | --- |
+| [docs/windows.md](docs/windows.md) | Native Windows 10/11 setup |
+| [docs/usage.md](docs/usage.md) | Run the server and SRE workflows |
+| [docs/architecture.md](docs/architecture.md) | Process and package layout |
+| [docs/diagnostic-engine.md](docs/diagnostic-engine.md) | RCA pipeline and capability matrix |
+| [docs/resource-graph.md](docs/resource-graph.md) | Ownership and dependency walks |
+| [docs/security.md](docs/security.md) | Runtime security architecture |
+| [docs/safe-actions.md](docs/safe-actions.md) | Mutating tools and confirmation |
+| [docs/configuration.md](docs/configuration.md) | Environment variables |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | Operators debugging the server |
+| [docs/prompt-examples.md](docs/prompt-examples.md) | Prompt library |
+| [CATALOG.md](CATALOG.md) | MCP tool contract |
+| [deploy/rbac.md](deploy/rbac.md) | Recommended Kubernetes permissions |
+| [install/README.md](install/README.md) | Build from source |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Development workflow |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
+| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards |
+| [SECURITY.md](SECURITY.md) | Vulnerability reporting |
 
 ## Contributing
 
@@ -496,8 +449,3 @@ Repository: [github.com/ielyaakouby/kube-sre-mcp](https://github.com/ielyaakouby
 Kube SRE MCP is licensed under the [Apache License 2.0](LICENSE).
 
 Copyright 2026 The Kube SRE MCP Authors.
-
-The complete license text is available in the [`LICENSE`](LICENSE) file
-and from the official Apache source:
-
-https://www.apache.org/licenses/LICENSE-2.0.txt
