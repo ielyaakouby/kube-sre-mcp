@@ -71,14 +71,49 @@ jobs:
               kube-sre-mcp-windows-amd64.exe > checksums.txt
           )
 
+      # Create a draft, attach every asset, then publish. GitHub immutable
+      # releases reject asset uploads after a release is public. The previous
+      # softprops/action-gh-release path created the release then uploaded in
+      # parallel, which failed with "Error creating asset temp dir".
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        with:
-          generate_release_notes: true
-          files: |
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ github.ref_name }}"
+          assets=(
             dist/kube-sre-mcp-linux-amd64
             dist/kube-sre-mcp-linux-arm64
             dist/kube-sre-mcp-darwin-amd64
             dist/kube-sre-mcp-darwin-arm64
             dist/kube-sre-mcp-windows-amd64.exe
             dist/checksums.txt
+          )
+          for f in "${assets[@]}"; do
+            test -f "$f"
+          done
+
+          extra=()
+          case "$tag" in
+            *-alpha*|*-beta*|*-rc*) extra+=(--prerelease) ;;
+          esac
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            if [[ "$(gh release view "$tag" --json isDraft --jq .isDraft)" == "true" ]]; then
+              echo "Removing leftover draft release ${tag} from a previous run"
+              gh release delete "$tag" --yes
+            else
+              echo "Published release ${tag} already exists; immutable releases cannot replace its assets." >&2
+              echo "Delete that GitHub Release (if allowed) or cut a new tag." >&2
+              exit 1
+            fi
+          fi
+
+          gh release create "$tag" \
+            --draft \
+            --verify-tag \
+            --generate-notes \
+            "${extra[@]}" \
+            "${assets[@]}"
+          gh release edit "$tag" --draft=false
+          gh release view "$tag" --json url,isDraft,isPrerelease,tagName
