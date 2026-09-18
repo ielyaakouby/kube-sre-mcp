@@ -19,7 +19,7 @@ package kube_test
 import (
 	"testing"
 
-	"kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
 )
 
 func TestNormalizeKind(t *testing.T) {

@@ -20,8 +20,8 @@ import (
 	"strings"
 	"testing"
 
-	"kube-sre-mcp/internal/logs"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/logs"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func TestAnalyze(t *testing.T) {

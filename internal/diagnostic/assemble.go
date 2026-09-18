@@ -21,11 +21,11 @@ import (
 	"sort"
 	"strings"
 
-	"kube-sre-mcp/internal/correlation"
-	"kube-sre-mcp/internal/health"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/recommendation"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/correlation"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/health"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/recommendation"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func assemble(cluster model.ClusterInfo, target model.ResourceRef, sigs []signal.DiagnosticSignal, vis *model.Visibility, depth string) model.DiagnosticResponse {

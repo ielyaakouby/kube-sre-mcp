@@ -29,10 +29,10 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/health"
-	"kube-sre-mcp/internal/kube"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/health"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func readyNode(name string) *corev1.Node {

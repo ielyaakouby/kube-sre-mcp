@@ -26,7 +26,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/testutil"
 
-	"kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
 )
 
 func TestMetricsUpdatesAndCardinality(t *testing.T) {

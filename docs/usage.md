@@ -10,14 +10,23 @@ Architecture: [architecture.md](architecture.md).
 ## Running kube-sre-mcp
 
 Go 1.26.6+ is required **to build from source**. A GitHub Release binary does not
-need a Go toolchain. Cluster credentials via kubeconfig (`KUBECONFIG` or
-`~/.kube/config`). In-cluster ServiceAccount authentication is not supported.
+need a Go toolchain.
 
 ```bash
+git clone https://github.com/ielyaakouby/kube-sre-mcp.git
+cd kube-sre-mcp
 make build
-./bin/kube-sre-mcp --version
 ./bin/kube-sre-mcp --help
 ```
+
+Cluster credentials via kubeconfig:
+
+* `KUBECONFIG` if set
+* otherwise `~/.kube/config`
+* `KUBE_SRE_MCP_CONTEXT` optional
+* otherwise kubeconfig `current-context`
+
+**v0.1.0 does not support in-cluster ServiceAccount authentication.**
 
 The server blocks on stdin/stdout.
 
@@ -43,7 +52,8 @@ kubeconfig current context is used.
 
 ## Connecting an MCP Client
 
-Transport is stdio only. Point the host at the **absolute** binary path.
+Transport is stdio only in v0.1.0. HTTP, SSE, and streamable HTTP are not supported.
+Point the host at the **absolute** binary path.
 
 `KUBE_SRE_MCP_CONTEXT` is **optional**. Omit it to use the kubeconfig `current-context`.
 

@@ -23,8 +23,8 @@ import (
 	"strings"
 	"testing"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/version"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/version"
 )
 
 const testKubeconfig = `apiVersion: v1

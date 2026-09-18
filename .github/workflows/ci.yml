@@ -116,7 +116,7 @@ jobs:
           tags: kube-sre-mcp:ci
           platforms: linux/amd64
           build-args: |
-            VERSION=0.1.0-beta.1
+            VERSION=0.1.0
 
   license:
     name: license

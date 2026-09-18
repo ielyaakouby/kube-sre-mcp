@@ -1,6 +1,6 @@
 # Installation — Kube SRE MCP
 
-Kube SRE MCP is a Go MCP server (stdio). v1 is local execution with kubeconfig
+Kube SRE MCP is a Go MCP server (stdio). v0.1.0 is local execution with kubeconfig
 authentication. Official artifacts are source and GitHub Release binaries; there
 is no published container image.
 

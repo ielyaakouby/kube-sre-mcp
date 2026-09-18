@@ -19,7 +19,7 @@ package graph
 import (
 	"k8s.io/apimachinery/pkg/types"
 
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 type RelType string

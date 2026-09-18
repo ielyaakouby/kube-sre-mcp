@@ -23,7 +23,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func TestSummarizeUnknownCRDOmitsSensitiveStatus(t *testing.T) {

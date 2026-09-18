@@ -1,0 +1,28 @@
+# Copyright 2026 The Kube SRE MCP Authors
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-sre-mcp-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crashloop-demo
+  namespace: kube-sre-mcp-demo
+  labels:
+    app: crashloop-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crashloop-demo
+  template:
+    metadata:
+      labels:
+        app: crashloop-demo
+    spec:
+      containers:
+        - name: crash
+          image: busybox:1.36
+          command: ["/bin/sh", "-c", "echo crashloop-demo; exit 1"]

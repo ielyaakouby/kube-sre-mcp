@@ -26,7 +26,7 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	"kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
 )
 
 func TestPrefixResolutionTagged(t *testing.T) {

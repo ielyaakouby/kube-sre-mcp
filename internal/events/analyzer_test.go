@@ -19,7 +19,7 @@ package events_test
 import (
 	"testing"
 
-	"kube-sre-mcp/internal/events"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/events"
 )
 
 func TestClassify(t *testing.T) {

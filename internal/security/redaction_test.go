@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 func TestRedact(t *testing.T) {

@@ -23,9 +23,9 @@ import (
 	discoveryv1 "k8s.io/api/discovery/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func DiagnoseIngress(cluster model.ClusterInfo, ing *networkingv1.Ingress, services map[string]*corev1.Service, slices map[string][]discoveryv1.EndpointSlice, tlsSecrets map[string]bool, classExists *bool, ev []signal.DiagnosticSignal) model.DiagnosticResponse {

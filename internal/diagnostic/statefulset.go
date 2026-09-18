@@ -22,9 +22,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func DiagnoseStatefulSet(cluster model.ClusterInfo, s *appsv1.StatefulSet, pods []corev1.Pod, pvcs []corev1.PersistentVolumeClaim, podSignals map[string][]signal.DiagnosticSignal, ev []signal.DiagnosticSignal) model.DiagnosticResponse {

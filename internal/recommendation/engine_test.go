@@ -19,7 +19,7 @@ package recommendation_test
 import (
 	"testing"
 
-	"kube-sre-mcp/internal/recommendation"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/recommendation"
 )
 
 func TestRestartUseful(t *testing.T) {

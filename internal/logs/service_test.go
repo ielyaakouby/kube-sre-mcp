@@ -29,8 +29,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"kube-sre-mcp/internal/logs"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/logs"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func logServer(t *testing.T, body string, status int) kubernetes.Interface {

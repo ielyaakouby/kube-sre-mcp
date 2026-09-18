@@ -82,7 +82,7 @@ Optional `context` on every tool selects a kubeconfig context via the client fac
 ### k8s_diagnose_resource
 
 Purpose:
-Primary diagnostic tool. Resolves the object, builds a resource graph, collects status/events/logs/dependencies (and metrics when `metrics.k8s.io` is available), correlates signals, and returns ranked root-cause hypotheses with evidence, impact, and recommendations.
+Primary diagnostic tool. Resolves the object, builds a resource graph, collects status/events/logs/dependencies (and metrics when `metrics.k8s.io` is available), correlates signals, and returns ranked diagnostic hypotheses with evidence, impact, and recommendations.
 
 Mode:
 DIAGNOSTIC (read-only)

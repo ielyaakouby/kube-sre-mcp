@@ -17,8 +17,8 @@
 package kube
 
 import (
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 func Record(v *model.Visibility, operation, resource, namespace string, err error) {

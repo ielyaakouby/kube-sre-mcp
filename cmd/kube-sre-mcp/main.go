@@ -24,10 +24,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"kube-sre-mcp/internal/config"
-	mcpserver "kube-sre-mcp/internal/mcp"
-	"kube-sre-mcp/internal/observability"
-	"kube-sre-mcp/internal/version"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	mcpserver "github.com/ielyaakouby/kube-sre-mcp/internal/mcp"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/version"
 )
 
 func main() {

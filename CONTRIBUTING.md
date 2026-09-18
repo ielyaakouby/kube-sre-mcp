@@ -13,10 +13,10 @@ Unless explicitly stated otherwise, contributions are provided under the Apache 
 | Requirement | Notes |
 | --- | --- |
 | Go | **1.26.6+** (`go 1.26.6` in [go.mod](go.mod)) |
-| Docker | Optional. Local image builds only (`make docker-build`, `Dockerfile`). v1 does not publish images. |
+| Docker | Optional. Local image builds only (`make docker-build`, `Dockerfile`). v0.1.0 does not publish images. |
 | Kubernetes cluster | **Not required** for unit tests. Tests use fake client-go objects under `internal/*`. A kubeconfig is required to **run** the server against a cluster. |
 
-Module path in Go is currently `kube-sre-mcp` (not the GitHub import path). Leave that unless a dedicated import-rewrite change is agreed.
+Module path in Go is `github.com/ielyaakouby/kube-sre-mcp`. After tag `v0.1.0` exists, `go install github.com/ielyaakouby/kube-sre-mcp/cmd/kube-sre-mcp@v0.1.0` is valid.
 
 ## Build
 

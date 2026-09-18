@@ -16,7 +16,7 @@
 
 package signal
 
-import "kube-sre-mcp/internal/model"
+import "github.com/ielyaakouby/kube-sre-mcp/internal/model"
 
 func RankConfidence(a, b model.Confidence) int {
 	return Score(a) - Score(b)

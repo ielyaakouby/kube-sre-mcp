@@ -1,9 +1,9 @@
 # Copyright 2026 The Kube SRE MCP Authors
 # SPDX-License-Identifier: Apache-2.0
 
-VERSION ?= 0.1.0-beta.1
+VERSION ?= 0.1.0
 IMAGE   ?= kube-sre-mcp
-LDFLAGS ?= -s -w -X kube-sre-mcp/internal/version.Version=$(VERSION)
+LDFLAGS ?= -s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=$(VERSION)
 
 .PHONY: help build build-all build-all-extra run test test-race test-cover fmt fmt-check vet lint check clean docker-build license-check
 

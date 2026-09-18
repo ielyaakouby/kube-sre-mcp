@@ -20,9 +20,9 @@ import (
 	"sort"
 	"strings"
 
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/recommendation"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/recommendation"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func Correlate(signals []signal.DiagnosticSignal, impact *model.Impact) []model.RootCauseHypothesis {

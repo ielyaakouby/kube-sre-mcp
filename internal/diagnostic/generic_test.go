@@ -21,8 +21,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"kube-sre-mcp/internal/diagnostic"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/diagnostic"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func TestGenericCRDConditions(t *testing.T) {

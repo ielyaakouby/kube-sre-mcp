@@ -24,7 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 type Result struct {

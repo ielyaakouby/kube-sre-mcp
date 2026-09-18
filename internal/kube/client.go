@@ -33,10 +33,10 @@ import (
 	"k8s.io/client-go/util/homedir"
 	metricsclient "k8s.io/metrics/pkg/client/clientset/versioned"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/security"
-	"kube-sre-mcp/internal/version"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/version"
 )
 
 const noKubeconfigHint = "failed to initialize Kubernetes client: no usable kubeconfig found\n\nSet KUBECONFIG or configure ~/.kube/config before starting kube-sre-mcp."

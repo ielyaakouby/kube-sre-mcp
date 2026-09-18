@@ -27,9 +27,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/security"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 type Record struct {

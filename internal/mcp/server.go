@@ -23,10 +23,10 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/kube"
-	"kube-sre-mcp/internal/observability"
-	"kube-sre-mcp/internal/version"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/version"
 )
 
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {

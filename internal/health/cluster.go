@@ -25,9 +25,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/kube"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 type Counts struct {

@@ -1,0 +1,36 @@
+# Copyright 2026 The Kube SRE MCP Authors
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-sre-mcp-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oomkilled-demo
+  namespace: kube-sre-mcp-demo
+  labels:
+    app: oomkilled-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oomkilled-demo
+  template:
+    metadata:
+      labels:
+        app: oomkilled-demo
+    spec:
+      containers:
+        - name: hog
+          image: busybox:1.36
+          command:
+            - /bin/sh
+            - -c
+            - x=a; while true; do x=$x$x$x$x; done
+          resources:
+            requests:
+              memory: 8Mi
+            limits:
+              memory: 16Mi

@@ -140,10 +140,7 @@ Mutating tools return:
 { "status": "disabled", "message": "write actions are disabled (KUBE_SRE_MCP_ACTIONS_ENABLED=false)" }
 ```
 
-Enable only with matching operator RBAC on the kubeconfig identity.
-
-`K8S_MCP_ACTIONS_ENABLED=true` does **not** enable actions. That name is not
-supported. Use `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
+Enable only with matching operator RBAC on the kubeconfig identity. The flag is `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
 
 ## confirmation_required
 

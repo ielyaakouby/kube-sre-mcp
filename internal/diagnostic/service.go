@@ -23,9 +23,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func DiagnoseService(cluster model.ClusterInfo, svc *corev1.Service, pods []corev1.Pod, slices []discoveryv1.EndpointSlice, endpoints *corev1.Endpoints, podSignals map[string][]signal.DiagnosticSignal, ev []signal.DiagnosticSignal, slicesKnown bool) model.DiagnosticResponse {

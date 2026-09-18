@@ -29,6 +29,11 @@ Use a kubeconfig user that can `get`/`list`/`watch` diagnostic resources,
 `create` SelfSubjectAccessReview, metrics API get/list, CRD *definition*
 get/list, and Secret `get`/`list` if you want existence/key checks.
 
+Recommended YAML for a **read-only diagnostic** identity: [rbac-readonly.yaml](rbac-readonly.yaml).
+That file has no mutating workload, Pod, or Node verbs. SelfSubjectAccessReview
+`create` is included so write tools fail closed if actions are later enabled
+without write RBAC. Do not mix write-action RBAC into it.
+
 Keep `KUBE_SRE_MCP_ACTIONS_ENABLED=false` for this profile.
 
 ### Why Secrets may require metadata/read access

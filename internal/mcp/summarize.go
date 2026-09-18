@@ -19,8 +19,8 @@ package mcpserver
 import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 func summarize(kind string, obj *unstructured.Unstructured, ref model.ResourceRef) any {

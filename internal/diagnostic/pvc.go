@@ -22,8 +22,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func DiagnosePVC(cluster model.ClusterInfo, pvc *corev1.PersistentVolumeClaim, pv *corev1.PersistentVolume, sc *storagev1.StorageClass, ev []signal.DiagnosticSignal) model.DiagnosticResponse {

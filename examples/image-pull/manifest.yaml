@@ -1,0 +1,28 @@
+# Copyright 2026 The Kube SRE MCP Authors
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-sre-mcp-demo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-pull-demo
+  namespace: kube-sre-mcp-demo
+  labels:
+    app: image-pull-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-pull-demo
+  template:
+    metadata:
+      labels:
+        app: image-pull-demo
+    spec:
+      containers:
+        - name: missing
+          image: ghcr.io/kube-sre-mcp/does-not-exist:v0.1.0
+          imagePullPolicy: Always

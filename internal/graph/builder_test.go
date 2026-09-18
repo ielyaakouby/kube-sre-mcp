@@ -29,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
 )
 
 func TestBuilderDeploymentOwnersAndPDB(t *testing.T) {

@@ -3,10 +3,10 @@
 Kube SRE MCP is a Go MCP server that diagnoses Kubernetes resources through
 deterministic analysis of API state. It does not embed an LLM. MCP clients
 provide natural-language interaction; this process returns structured evidence,
-ranked root-cause hypotheses, and (when explicitly enabled) a small set of
+ranked diagnostic hypotheses, and (when explicitly enabled) a small set of
 gated mutating actions.
 
-Transport is **stdio only**. There is no HTTP MCP endpoint.
+Supported in v0.1.0: **stdio**. Not supported: HTTP, SSE, streamable HTTP.
 
 ## Getting Started
 
@@ -39,12 +39,13 @@ Vulnerability reporting lives in root [SECURITY.md](../SECURITY.md), not here.
 * [install/README.md](../install/README.md) — build from source.
 * [CONTRIBUTING.md](../CONTRIBUTING.md) — development workflow.
 * [CHANGELOG.md](../CHANGELOG.md) — release history.
+* [v0.1.0 release notes](releases/v0.1.0.md) — first public release.
 
 ## Recommended Reading Order
 
 1. [usage.md](usage.md) — how to run and ask useful questions.
 2. [architecture.md](architecture.md) — how the process is structured.
-3. [diagnostic-engine.md](diagnostic-engine.md) — how RCA is produced.
+3. [diagnostic-engine.md](diagnostic-engine.md) — how diagnostic hypotheses are produced.
 4. [resource-graph.md](resource-graph.md) — why related objects are walked.
 5. [security.md](security.md) — what the LLM is *not* allowed to authorize.
 6. [safe-actions.md](safe-actions.md) — when and how mutations execute.

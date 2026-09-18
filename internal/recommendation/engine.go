@@ -16,7 +16,7 @@
 
 package recommendation
 
-import "kube-sre-mcp/internal/model"
+import "github.com/ielyaakouby/kube-sre-mcp/internal/model"
 
 func For(category string) []model.RecommendedAction {
 	switch category {

@@ -19,7 +19,7 @@ package signal
 import (
 	"time"
 
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 type Source string

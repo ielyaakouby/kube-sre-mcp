@@ -28,7 +28,7 @@ cd "$REPO_ROOT"
 echo "Downloading modules..."
 go mod download
 echo "Building Kube SRE MCP..."
-go build -ldflags="-s -w -X kube-sre-mcp/internal/version.Version=0.1.0-beta.1" -o bin/kube-sre-mcp ./cmd/kube-sre-mcp
+go build -ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=0.1.0" -o bin/kube-sre-mcp ./cmd/kube-sre-mcp
 echo "OK  binary at $REPO_ROOT/bin/kube-sre-mcp"
 
 if [[ "${RUN_TESTS:-}" == "1" ]]; then

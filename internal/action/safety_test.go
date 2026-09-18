@@ -33,9 +33,9 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/action"
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/action"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
 )
 
 func TestConfirmationTamperAndReplay(t *testing.T) {

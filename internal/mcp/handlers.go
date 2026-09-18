@@ -28,16 +28,16 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"kube-sre-mcp/internal/action"
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/diagnostic"
-	"kube-sre-mcp/internal/events"
-	"kube-sre-mcp/internal/health"
-	"kube-sre-mcp/internal/kube"
-	"kube-sre-mcp/internal/logs"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/observability"
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/action"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/diagnostic"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/events"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/health"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/logs"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 type Server struct {
@@ -218,7 +218,7 @@ type cordonArgs struct {
 }
 
 func (s *Server) Register(srv *mcp.Server) {
-	mcp.AddTool(srv, &mcp.Tool{Name: "k8s_diagnose_resource", Description: "PRIMARY DIAGNOSTIC TOOL. Diagnose why any Kubernetes resource is unhealthy. Resolves namespace, builds a resource graph, correlates status/events/logs/dependencies, and returns ranked root-cause hypotheses with evidence.", Annotations: ro()}, s.diagnoseResource)
+	mcp.AddTool(srv, &mcp.Tool{Name: "k8s_diagnose_resource", Description: "PRIMARY DIAGNOSTIC TOOL. Diagnose why any Kubernetes resource is unhealthy. Resolves namespace, builds a resource graph, correlates status/events/logs/dependencies, and returns ranked diagnostic hypotheses with evidence.", Annotations: ro()}, s.diagnoseResource)
 	mcp.AddTool(srv, &mcp.Tool{Name: "k8s_diagnose_pod", Description: "Deep-diagnose a Pod: container status, probes, scheduling, dependencies, events, logs, RCA.", Annotations: ro()}, s.diagnosePod)
 	mcp.AddTool(srv, &mcp.Tool{Name: "k8s_diagnose_deployment", Description: "Diagnose a Deployment including ReplicaSets and unhealthy Pods; aggregated workload RCA.", Annotations: ro()}, s.diagnoseDeploy)
 	mcp.AddTool(srv, &mcp.Tool{Name: "k8s_diagnose_service", Description: "Diagnose a Service: selector, EndpointSlices, ports, and selected Pod health.", Annotations: ro()}, s.diagnoseService)

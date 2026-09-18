@@ -19,7 +19,7 @@ Security fixes are accepted on `main` of
 
 There is no published LTS matrix yet. If you run a tagged release, include that
 version in your report so maintainers can tell whether the issue still applies
-to current `main`. Current software version is `0.1.0-beta.1` (`internal/version`).
+to current `main`. Current software version is `v0.1.0` (`internal/version`).
 
 ## Reporting vulnerabilities
 

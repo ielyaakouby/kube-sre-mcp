@@ -21,7 +21,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
 )
 
 func TestRedactTable(t *testing.T) {

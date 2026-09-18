@@ -33,10 +33,10 @@ import (
 	kfake "k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/kube"
-	mcpserver "kube-sre-mcp/internal/mcp"
-	"kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	mcpserver "github.com/ielyaakouby/kube-sre-mcp/internal/mcp"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
 )
 
 func schemeAll() *runtime.Scheme {

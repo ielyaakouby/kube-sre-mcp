@@ -16,7 +16,7 @@
 
 package action
 
-import "kube-sre-mcp/internal/security"
+import "github.com/ielyaakouby/kube-sre-mcp/internal/security"
 
 func errMsg(err error) string {
 	if err == nil {

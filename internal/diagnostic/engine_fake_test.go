@@ -32,9 +32,9 @@ import (
 	kfake "k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/diagnostic"
-	"kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/diagnostic"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
 )
 
 func scheme() *runtime.Scheme {

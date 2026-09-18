@@ -29,8 +29,8 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/events"
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/events"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func ev(id, obj, kind, reason, msg, typ string, count int32, ns string) *corev1.Event {

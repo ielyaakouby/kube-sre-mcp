@@ -51,7 +51,7 @@ body:
     attributes:
       label: kube-sre-mcp version
       description: "Output of kube-sre-mcp --version, or git commit SHA if built from source."
-      placeholder: "0.1.0-beta.1"
+      placeholder: "v0.1.0"
     validations:
       required: true
 

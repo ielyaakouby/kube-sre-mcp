@@ -21,16 +21,25 @@ import "strings"
 // Version is the release identifier used by the binary, MCP implementation
 // metadata, and Kubernetes HTTP User-Agent. Override at build time with:
 //
-//	go build -ldflags "-X kube-sre-mcp/internal/version.Version=0.1.0-beta.1"
+//	go build -ldflags "-X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=0.1.0"
 //
-// Git tags may include a leading "v"; String() and UserAgent() strip it.
-var Version = "0.1.0-beta.1"
+// Git tags may include a leading "v"; String() always reports a v-prefixed
+// value (for example v0.1.0). UserAgent() uses the unprefixed form.
+var Version = "0.1.0"
 
-func String() string {
+func numeric() string {
 	return strings.TrimPrefix(Version, "v")
 }
 
-// UserAgent is the Kubernetes client User-Agent, for example kube-sre-mcp/0.1.0-beta.1.
+func String() string {
+	v := numeric()
+	if v == "" {
+		return "v0.0.0-dev"
+	}
+	return "v" + v
+}
+
+// UserAgent is the Kubernetes client User-Agent, for example kube-sre-mcp/0.1.0.
 func UserAgent() string {
-	return "kube-sre-mcp/" + String()
+	return "kube-sre-mcp/" + numeric()
 }

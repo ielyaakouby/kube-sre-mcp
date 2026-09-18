@@ -1,7 +1,7 @@
 // Copyright 2026 The Kube SRE MCP Authors
 // SPDX-License-Identifier: Apache-2.0
 
-module kube-sre-mcp
+module github.com/ielyaakouby/kube-sre-mcp
 
 go 1.26.6
 

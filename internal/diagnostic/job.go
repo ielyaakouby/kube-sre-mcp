@@ -22,9 +22,9 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func DiagnoseJob(cluster model.ClusterInfo, j *batchv1.Job, pods []corev1.Pod, podSignals map[string][]signal.DiagnosticSignal, ev []signal.DiagnosticSignal) model.DiagnosticResponse {

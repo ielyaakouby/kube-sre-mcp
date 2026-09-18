@@ -28,10 +28,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"kube-sre-mcp/internal/diagnostic"
-	"kube-sre-mcp/internal/logs"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/diagnostic"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/logs"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func cluster() model.ClusterInfo { return model.ClusterInfo{Context: "test", Namespace: "default"} }

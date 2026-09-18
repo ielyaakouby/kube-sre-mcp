@@ -12,7 +12,7 @@ kube-sre-mcp itself:
 * queries the API;
 * builds a bounded Resource Graph;
 * emits normalized Signals from status, Events, logs, dependencies, and optional metrics;
-* correlates Signals into ranked Root Cause Hypotheses;
+* correlates Signals into ranked diagnostic hypotheses;
 * attaches Evidence, Confidence, Impact, Visibility, and Recommendations;
 * optionally executes a small, gated Safe Action surface.
 
@@ -183,10 +183,10 @@ shuts down when the MCP process exits.
 
 ## Deployment
 
-* Local binary on stdio with kubeconfig authentication is the supported runtime for v1.
-* A `Dockerfile` is provided for optional local image builds. v1 does not publish images to GHCR or any other registry.
+* Local binary on stdio with kubeconfig authentication is the supported runtime for v0.1.0.
+* A `Dockerfile` is provided for optional local image builds. v0.1.0 does not publish images to GHCR or any other registry.
 * In-cluster ServiceAccount authentication is **not** supported in this release.
-* Container publishing and in-cluster execution are planned for a future v2.
+* Container publishing and in-cluster execution are planned for a future release.
 
 ## Non-Goals
 

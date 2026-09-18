@@ -19,9 +19,9 @@ package health_test
 import (
 	"testing"
 
-	"kube-sre-mcp/internal/health"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/health"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func TestEvaluateRBACUnknown(t *testing.T) {

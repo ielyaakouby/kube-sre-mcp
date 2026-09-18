@@ -20,7 +20,7 @@ import (
 	"os"
 	"testing"
 
-	"kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
 )
 
 func TestActionsDisabledByDefault(t *testing.T) {

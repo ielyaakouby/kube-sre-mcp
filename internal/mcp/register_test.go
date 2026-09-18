@@ -21,9 +21,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/observability"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/observability"
 )
 
 func TestRegisterDoesNotPanic(t *testing.T) {

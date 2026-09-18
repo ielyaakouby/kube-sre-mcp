@@ -17,7 +17,7 @@
 package diagnostic
 
 import (
-	"kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
 )
 
 func okResp(cluster model.ClusterInfo, target model.ResourceRef, health model.Health, summary string) model.DiagnosticResponse {

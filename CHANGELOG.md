@@ -5,29 +5,41 @@ All notable changes to kube-sre-mcp are documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0-beta.1] — 2026-09-15
+## [0.1.0] - 2026-09-18
 
-First public community beta. There are no earlier published versions.
+First public release of kube-sre-mcp.
 
 ### Added
 
-* MCP stdio server implemented in Go (`cmd/kube-sre-mcp`).
-* Kubernetes authentication via kubeconfig only (`KUBECONFIG` or `~/.kube/config`).
-* Read-only Kubernetes diagnostic tools: resource diagnosis, cluster health, events, logs, find/get/list, and context inspection.
-* Bounded resource-graph walks and ranked root-cause hypotheses (RCA) from API evidence.
-* Kubernetes native RBAC as the authorization boundary for the kubeconfig identity.
-* Secret value protection: Secret `.data` is never returned; logs, events, and errors are redacted.
-* Optional guarded mutating actions (restart Deployment, scale workload, delete Pod, cordon/uncordon Node).
-* Official binaries for Linux (amd64, arm64), macOS (amd64, arm64), and Windows (amd64).
-* Official v1 distribution is local execution (source or GitHub Release binaries) with kubeconfig authentication. Docker images are not published.
+* MCP server over stdio
+* kubeconfig-based Kubernetes authentication
+* Kubernetes resource diagnostics
+* Pod, Deployment, Service, Node, StatefulSet, DaemonSet, Job, CronJob, Ingress and PVC diagnostics
+* Kubernetes Events analysis
+* container logs and previous logs analysis
+* CrashLoopBackOff detection
+* OOMKilled detection
+* image-pull diagnostics
+* Pending/scheduling diagnostics
+* resource relationship graph
+* ranked diagnostic hypotheses
+* actionable recommendations
+* optional guarded remediation actions
 
 ### Security
 
-* Mutating actions are disabled by default (`KUBE_SRE_MCP_ACTIONS_ENABLED=false`).
-* Writes require Kubernetes SelfSubjectAccessReview (SSAR) plus a two-step confirmation token bound to action, target, UID, context, and parameters.
-* kube-sre-mcp provides server-side confirmation semantics; the MCP host/client is responsible for presenting confirmation to a user and must not automatically submit confirmation IDs without user approval. Server confirmation is not proof of human interaction.
-* Kubernetes RBAC remains the final authorization boundary on the API server.
-* Secret values are stripped from MCP responses; action API errors and unknown CRD status maps are redacted or bounded.
-* There is no in-cluster ServiceAccount authentication fallback in this release.
+* read-only behavior by default
+* write actions disabled unless explicitly enabled
+* authorization checks before actions
+* two-step confirmation for write operations
+* safety guards around disruptive actions
+* Secret data is not returned
 
-[0.1.0-beta.1]: https://github.com/ielyaakouby/kube-sre-mcp/releases/tag/v0.1.0-beta.1
+### Known limitations
+
+* stdio MCP transport only
+* kubeconfig authentication only
+* no in-cluster ServiceAccount authentication
+* evidence-based diagnostic hypotheses, not deterministic causal RCA
+
+[0.1.0]: https://github.com/ielyaakouby/kube-sre-mcp/releases/tag/v0.1.0

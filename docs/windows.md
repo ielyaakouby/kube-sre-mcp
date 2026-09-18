@@ -84,7 +84,7 @@ are bound to that context so a second call cannot silently target another cluste
 ## Install the binary
 
 1. Download `kube-sre-mcp-windows-amd64.exe` from the GitHub release
-   (`v0.1.0-beta.1` or later).
+   (`v0.1.0` or later).
 2. Optionally verify SHA-256 against `checksums.txt` from the same release.
 3. Place it in a directory you control, for example:
 
@@ -95,7 +95,7 @@ C:\Users\<USERNAME>\kube-sre-mcp\kube-sre-mcp-windows-amd64.exe
 Build from source (Go 1.26.6+):
 
 ```powershell
-go build -trimpath -ldflags="-s -w -X kube-sre-mcp/internal/version.Version=0.1.0-beta.1" -o kube-sre-mcp-windows-amd64.exe ./cmd/kube-sre-mcp
+go build -trimpath -ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=0.1.0" -o kube-sre-mcp-windows-amd64.exe ./cmd/kube-sre-mcp
 ```
 
 ## Test kubectl first
@@ -120,20 +120,11 @@ $env:KUBE_SRE_MCP_ACTIONS_ENABLED = "false"
 Starting the binary without `--version` / `--help` speaks MCP on stdio and will
 block waiting for a client. Logs are JSON on **stderr**.
 
-Wrong variable (does **not** enable actions):
-
-```powershell
-$env:K8S_MCP_ACTIONS_ENABLED = "true"   # ignored
-```
-
-Correct variable:
-
-```powershell
-$env:KUBE_SRE_MCP_ACTIONS_ENABLED = "true"
-```
-
 Default is disabled. Leave it `false` unless you intend to mutate the cluster
 and the kubeconfig identity has matching RBAC.
+
+Writes are available only when `KUBE_SRE_MCP_ACTIONS_ENABLED=true`. They still
+run authorization checks, a two-step confirmation flow, and safety guards.
 
 ## Claude / MCP configuration
 
@@ -174,7 +165,7 @@ instead.
 | kubectl works in WSL but not in PowerShell | You are using a Linux kubeconfig; copy or recreate it for Windows paths |
 | Certificate errors | Flatten the kubeconfig or fix `certificate-authority` / client cert paths |
 | MCP host cannot start the server | Use an absolute `.exe` path with doubled backslashes in JSON |
-| Actions stay disabled | `K8S_MCP_ACTIONS_ENABLED` is unsupported; set `KUBE_SRE_MCP_ACTIONS_ENABLED=true` |
+| Actions stay disabled | Set `KUBE_SRE_MCP_ACTIONS_ENABLED=true` |
 | Wrong cluster | Check `kubectl config current-context` or set `KUBE_SRE_MCP_CONTEXT` |
 | 32-bit download missing | Official releases ship **windows-amd64** only |
 

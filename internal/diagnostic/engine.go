@@ -34,15 +34,15 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 
-	"kube-sre-mcp/internal/config"
-	"kube-sre-mcp/internal/events"
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/health"
-	"kube-sre-mcp/internal/kube"
-	"kube-sre-mcp/internal/logs"
-	"kube-sre-mcp/internal/metrics"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/config"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/events"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/health"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/logs"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/metrics"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 type Engine struct {

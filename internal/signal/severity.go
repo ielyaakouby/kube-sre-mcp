@@ -16,7 +16,7 @@
 
 package signal
 
-import "kube-sre-mcp/internal/model"
+import "github.com/ielyaakouby/kube-sre-mcp/internal/model"
 
 func MaxSeverity(ss ...model.Severity) model.Severity {
 	best := model.SeverityInfo

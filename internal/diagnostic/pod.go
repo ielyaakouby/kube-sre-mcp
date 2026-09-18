@@ -23,10 +23,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"kube-sre-mcp/internal/graph"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/security"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/graph"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/security"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 type PodInput struct {

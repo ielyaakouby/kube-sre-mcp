@@ -4,7 +4,7 @@ All runtime configuration is **environment variables** loaded in
 `internal/config.Load`. The binary flags are only `--help` / `-h` and
 `--version`.
 
-There is no MCP HTTP port and no REST listen address. Stdio MCP is not
+There is no MCP HTTP, SSE, or streamable HTTP transport in v0.1.0. Stdio MCP is not
 configurable.
 
 Never put tokens or passwords in examples or MCP client JSON.
@@ -47,7 +47,7 @@ When `KUBE_SRE_MCP_CONTEXT` is unset, the kubeconfig `current-context` is used.
 
 | Variable | Default | Description | Example |
 | --- | --- | --- | --- |
-| `KUBE_SRE_MCP_ACTIONS_ENABLED` | `false` | When `true`, mutating tools may execute (still SSAR + confirmation + preflight). When `false`, they return `status: disabled`. `K8S_MCP_ACTIONS_ENABLED` is **not** read. | `true` |
+| `KUBE_SRE_MCP_ACTIONS_ENABLED` | `false` | When `true`, mutating tools may execute (still SSAR + confirmation + preflight). When `false`, they return `status: disabled`. | `true` |
 | `KUBE_SRE_MCP_MAX_REPLICAS` | `100` | Upper bound for `k8s_scale_workload`. | `50` |
 | `KUBE_SRE_MCP_CONFIRMATION_TTL_SECONDS` | `120` | Confirmation token TTL (seconds). In-memory, single-use. | `60` |
 
@@ -67,7 +67,7 @@ Prometheus series (when the listener is enabled): `mcp_tool_calls_total`,
 | Flag | Default | Description | Example |
 | --- | --- | --- | --- |
 | `--help` / `-h` | — | Print usage and exit | `kube-sre-mcp --help` |
-| `--version` | — | Print `internal/version` and exit | `kube-sre-mcp --version` |
+| `--version` | — | Print version (`v0.1.0`) and exit | `kube-sre-mcp --version` |
 
 ## Production-safe defaults
 

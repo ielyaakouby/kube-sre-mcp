@@ -24,7 +24,7 @@ import (
 	fakedisco "k8s.io/client-go/discovery/fake"
 	ktesting "k8s.io/client-go/testing"
 
-	"kube-sre-mcp/internal/kube"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/kube"
 )
 
 func TestCRDDiscoveryRefreshAndScope(t *testing.T) {

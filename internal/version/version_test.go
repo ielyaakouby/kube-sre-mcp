@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"kube-sre-mcp/internal/version"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/version"
 )
 
 func TestStringAndUserAgent(t *testing.T) {
@@ -28,17 +28,24 @@ func TestStringAndUserAgent(t *testing.T) {
 	if got == "" {
 		t.Fatal("empty version")
 	}
-	if strings.HasPrefix(got, "v") {
-		t.Fatalf("String() should not keep a leading v: %q", got)
+	if !strings.HasPrefix(got, "v") {
+		t.Fatalf("String() should report a leading v: %q", got)
 	}
-	if strings.HasPrefix(got, "4.") || got == "4.0.0" {
-		t.Fatalf("legacy version still present: %q", got)
+	if strings.Contains(got, "beta") || got == "v1.0.0" || got == "1.0.0" {
+		t.Fatalf("stale version still present: %q", got)
+	}
+	if got != "v0.1.0" && version.Version == "0.1.0" {
+		t.Fatalf("expected default release v0.1.0, got %q", got)
 	}
 	ua := version.UserAgent()
-	if ua != "kube-sre-mcp/"+got {
-		t.Fatalf("UserAgent: got %q want kube-sre-mcp/%s", ua, got)
+	wantUA := "kube-sre-mcp/" + strings.TrimPrefix(version.Version, "v")
+	if ua != wantUA {
+		t.Fatalf("UserAgent: got %q want %q", ua, wantUA)
 	}
-	if !strings.Contains(ua, "0.1.0-beta.1") && version.Version == "0.1.0-beta.1" {
-		t.Fatalf("expected default release in User-Agent: %q", ua)
+	if !strings.Contains(ua, "0.1.0") {
+		t.Fatalf("expected 0.1.0 in User-Agent: %q", ua)
+	}
+	if strings.Contains(ua, "v0.1.0") {
+		t.Fatalf("User-Agent should not double the v prefix: %q", ua)
 	}
 }

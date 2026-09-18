@@ -19,9 +19,9 @@ package correlation_test
 import (
 	"testing"
 
-	"kube-sre-mcp/internal/correlation"
-	"kube-sre-mcp/internal/model"
-	"kube-sre-mcp/internal/signal"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/correlation"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/model"
+	"github.com/ielyaakouby/kube-sre-mcp/internal/signal"
 )
 
 func TestLogHTTP403NotRegistry(t *testing.T) {

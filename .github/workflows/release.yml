@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           mkdir -p dist
           VERSION="${VERSION#v}"
-          ldflags="-s -w -X kube-sre-mcp/internal/version.Version=${VERSION}"
+          ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=${VERSION}"
           build() {
             local goos="$1" goarch="$2" out="$3"
             echo "Building ${out}"
