@@ -11,48 +11,93 @@
 
 **Give your AI assistant an SRE that understands your Kubernetes cluster.**
 
-Kube SRE MCP is a [Model Context Protocol](https://modelcontextprotocol.io/) server for Kubernetes troubleshooting and SRE diagnostics, built in Go with `client-go`.
+Kube SRE MCP is a Kubernetes troubleshooting and SRE diagnostics [MCP](https://modelcontextprotocol.io/) server, built in Go with `client-go`. Its focus is a **deterministic diagnostic engine**: it collects, normalizes, correlates, and ranks Kubernetes evidence such as status, conditions, Events, logs, dependencies, scheduling signals, storage signals, and optional metrics. The result is ranked diagnostic hypotheses with supporting evidence, impact, visibility, confidence, and recommendations.
 
-There is no embedded LLM. The MCP host supplies reasoning. This server collects and correlates Kubernetes evidence, then returns ranked diagnostic hypotheses and recommendations. Guarded actions are optional and disabled by default.
+There is no embedded LLM. The MCP host selects tools and may interpret or narrate the structured output. Evidence collection, normalization, correlation, and hypothesis ranking run deterministically inside `kube-sre-mcp`.
 
 ```text
 Observe → Diagnose → Explain → Safely Act
 ```
 
-**v0.1.0** runs locally over **stdio**, uses **kubeconfig authentication**, and is **read-only by default**. HTTP transports, in-cluster ServiceAccount authentication, and official container images are not supported. Kubernetes RBAC remains the authorization boundary. Diagnostic hypotheses are evidence-based, not guaranteed causal RCA.
+**v0.1.0 scope**
 
-This is an independent open-source project. It is not a CNCF-hosted project and is not affiliated with the Apache Software Foundation.
+- Local execution
+- stdio transport
+- kubeconfig authentication
+- Read-only by default
+- No HTTP transport
+- No in-cluster ServiceAccount authentication
+- No official container image
+- Kubernetes RBAC remains the authorization boundary
+
+**Diagnostic results are evidence-based hypotheses, not guaranteed causal root-cause analysis.**
 
 ## Why Kube SRE MCP
 
-Generic Kubernetes MCP:
+General-purpose Kubernetes MCP servers provide broad Kubernetes access and operational capabilities.
+
+Kube SRE MCP intentionally focuses on a specialized, deterministic **SRE diagnostic layer**.
+
+**The goal is not to replace `kubectl` or provide generic Kubernetes CRUD.**
+
+It is designed to help answer:
+
+- What is unhealthy?
+- Why does it appear unhealthy?
+- What evidence supports that diagnosis?
+- What is impacted?
+- How confident is the diagnosis?
+- What should be investigated or done next?
+
+**Diagnostics-first, not generic CRUD.**
 
 ```text
-AI → list / get → raw Kubernetes data
+                    Kubernetes API
+                          │
+            ┌─────────────┼─────────────┐
+            │             │             │
+          Status        Events         Logs
+            │             │             │
+            └─────────────┼─────────────┘
+                          │
+                   Dependencies
+                   Scheduling
+                     Storage
+                     Metrics
+                          │
+                          ▼
+                 Normalize Signals
+                          │
+                          ▼
+                 Correlate Evidence
+                          │
+                          ▼
+               Rank Diagnostic
+                  Hypotheses
+                          │
+                          ▼
+            Confidence + Impact
+                 + Visibility
+                          │
+                          ▼
+                  Recommendations
+                          │
+                          ▼
+              Optional Guarded Actions
 ```
-
-Kube SRE MCP:
-
-```text
-AI
-  → Kube SRE MCP
-  → status + Events + logs + dependencies + metrics
-  → correlated diagnostic hypotheses
-  → recommendations
-  → optional guarded actions
-```
-
-Diagnostics-first, not generic CRUD.
 
 ## What it can do
 
 - Diagnose Pods, Deployments, Services, Nodes and other Kubernetes resources
 - Correlate status, Events, logs, dependencies and optional metrics
+- Produce deterministic, ranked diagnostic hypotheses with supporting evidence
+- Report partial visibility and RBAC gaps instead of treating missing evidence as healthy
+- Expose impact and recommendations
 - Detect common Kubernetes failures such as CrashLoopBackOff, OOMKilled, image pull, scheduling, storage and backend issues
 - Inspect cluster health and unhealthy workloads
 - Read Events and logs with redaction
 - Diagnose generic Kubernetes resources and CRDs through discovery and `status.conditions`
-- Optionally perform guarded write operations
+- Support guarded optional actions only when explicitly enabled
 
 See [`CATALOG.md`](CATALOG.md) for the complete MCP tool list, schemas, arguments and RBAC requirements.
 
@@ -80,9 +125,9 @@ Verify the imagePullSecret configuration.
 
 ## Safety
 
-Read-only by default. Writes require `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
+Read-only by default. Write actions require `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
 
-Kubernetes RBAC remains authoritative. Guarded actions use authorization and preflight checks, then two-step confirmation. The MCP host must obtain human approval before submitting the confirmation token.
+Guarded actions run authorization and preflight checks, then a two-step confirmation flow. The MCP host must obtain human approval before submitting the confirmation token. Kubernetes RBAC remains the final authorization boundary.
 
 [Security](docs/security.md) · [Safe actions](docs/safe-actions.md) · [RBAC](deploy/rbac.md) · [Vulnerability reporting](SECURITY.md)
 
@@ -104,12 +149,23 @@ kube-sre-mcp_${VERSION}_darwin_arm64.tar.gz
 kube-sre-mcp_${VERSION}_windows_amd64.zip
 ```
 
+Verify the SHA256 checksum from `checksums.txt` **before** extracting or installing the binary.
+
 ```bash
 VERSION=0.1.0
+ARCHIVE="kube-sre-mcp_${VERSION}_linux_amd64.tar.gz"
+BASE_URL="https://github.com/ielyaakouby/kube-sre-mcp/releases/download/v${VERSION}"
 
-wget https://github.com/ielyaakouby/kube-sre-mcp/releases/download/v${VERSION}/kube-sre-mcp_${VERSION}_linux_amd64.tar.gz
+wget "${BASE_URL}/${ARCHIVE}"
+wget "${BASE_URL}/checksums.txt"
 
-tar -xzf kube-sre-mcp_${VERSION}_linux_amd64.tar.gz
+if command -v sha256sum >/dev/null 2>&1; then
+  grep -F "${ARCHIVE}" checksums.txt | sha256sum -c -
+else
+  grep -F "${ARCHIVE}" checksums.txt | shasum -a 256 -c -
+fi
+
+tar -xzf "${ARCHIVE}"
 
 mkdir -p "$HOME/.local/bin"
 
@@ -156,7 +212,9 @@ make build
 
 ## MCP Client Setup
 
-Cursor and other MCP hosts that can spawn a local stdio process can use the same configuration. After the Getting Started install, the Unix binary is `$HOME/.local/bin/kube-sre-mcp` **in a shell**. MCP clients typically do **not** run through a shell and do **not** expand `$HOME`, so `command` must be a real absolute filesystem path.
+Claude and other MCP hosts that can spawn a local stdio process can use the same configuration. After the Getting Started install, the Unix binary is `$HOME/.local/bin/kube-sre-mcp` **in a shell**. MCP clients typically do **not** run through a shell and do **not** expand `$HOME`, so `command` must be a real absolute filesystem path.
+
+`KUBE_SRE_MCP_ACTIONS_ENABLED=false` keeps the server read-only. Setting it to `true` enables only the guarded write tools (restart, scale, delete Pod, cordon/uncordon), not generic Kubernetes CRUD. See [Safety](#safety).
 
 Linux:
 
@@ -219,3 +277,5 @@ Report vulnerabilities privately. Do not open a public GitHub issue. See [SECURI
 Kube SRE MCP is licensed under the [Apache License 2.0](LICENSE).
 
 Copyright 2026 The Kube SRE MCP Authors.
+
+Kube SRE MCP is an independent open-source project and is not a CNCF-hosted project.
