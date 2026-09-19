@@ -43,3 +43,14 @@ First public release of kube-sre-mcp.
 * evidence-based diagnostic hypotheses, not deterministic causal RCA
 
 [0.1.0]: https://github.com/ielyaakouby/kube-sre-mcp/releases/tag/v0.1.0
+
+## [0.1.1] - 2026-09-19
+
+### Changed
+- Package release binaries as tar.gz/zip archives
+- Add versioned release asset names
+- Generate checksums for distributed archives
+- Install Unix binary under `$HOME/.local/bin`
+- Improve Getting Started instructions
+- Improve MCP client setup documentation
+- Add/update Windows setup documentation
