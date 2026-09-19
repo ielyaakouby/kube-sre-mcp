@@ -88,43 +88,113 @@ Kubernetes RBAC remains authoritative. Guarded actions use authorization and pre
 
 ## Getting Started
 
-Go is not required when using a prebuilt [GitHub Release](https://github.com/ielyaakouby/kube-sre-mcp/releases) binary. You need a reachable Kubernetes API, a local kubeconfig, and an MCP client that can spawn a local stdio process.
+Go is not required when using a prebuilt [GitHub Release](https://github.com/ielyaakouby/kube-sre-mcp/releases) archive. You need a reachable Kubernetes API, a local kubeconfig, and an MCP client that can spawn a local stdio process.
 
-```bash
-chmod +x kube-sre-mcp-linux-amd64
-mv kube-sre-mcp-linux-amd64 kube-sre-mcp
+Uses `KUBECONFIG` if set, otherwise `~/.kube/config`. Optional `KUBE_SRE_MCP_CONTEXT`; otherwise the kubeconfig current-context.
 
-export KUBECONFIG="$HOME/.kube/config"
-./kube-sre-mcp
+### Linux and macOS
+
+Install into `$HOME/.local/bin` so `sudo` is not required. Choose the archive that matches your OS and CPU. The commands below use `linux_amd64`; substitute `linux_arm64`, `darwin_amd64`, or `darwin_arm64` as needed.
+
+```text
+kube-sre-mcp_${VERSION}_linux_amd64.tar.gz
+kube-sre-mcp_${VERSION}_linux_arm64.tar.gz
+kube-sre-mcp_${VERSION}_darwin_amd64.tar.gz
+kube-sre-mcp_${VERSION}_darwin_arm64.tar.gz
+kube-sre-mcp_${VERSION}_windows_amd64.zip
 ```
 
-Uses `KUBECONFIG` if set, otherwise `~/.kube/config`. Optional `KUBE_SRE_MCP_CONTEXT`; otherwise the kubeconfig current-context. Windows: [docs/windows.md](docs/windows.md).
+```bash
+VERSION=0.1.0
 
-Build from source (Go 1.26.6+, see `go.mod`):
+wget https://github.com/ielyaakouby/kube-sre-mcp/releases/download/v${VERSION}/kube-sre-mcp_${VERSION}_linux_amd64.tar.gz
+
+tar -xzf kube-sre-mcp_${VERSION}_linux_amd64.tar.gz
+
+mkdir -p "$HOME/.local/bin"
+
+mv kube-sre-mcp "$HOME/.local/bin/kube-sre-mcp"
+
+chmod +x "$HOME/.local/bin/kube-sre-mcp"
+```
+
+Ensure `$HOME/.local/bin` is on `PATH` in the current session:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+To keep that for new terminals, append the same line to the config file for **your** shell (`~/.bashrc` for bash, `~/.zshrc` for zsh)—do not add both unless you use both shells:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+```
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+```
+
+Validate:
+
+```bash
+kube-sre-mcp --version
+kube-sre-mcp --help
+```
+
+Windows uses a ZIP, not this Unix path. See [docs/windows.md](docs/windows.md).
+
+### Build from source
+
+Go 1.26.6+ (see `go.mod`):
 
 ```bash
 git clone https://github.com/ielyaakouby/kube-sre-mcp.git
 cd kube-sre-mcp
 make build
+./bin/kube-sre-mcp --help
 ```
 
 ## MCP Client Setup
 
-Cursor and other MCP hosts that can spawn a local stdio process can use the same configuration. Use an absolute path to the binary.
+Cursor and other MCP hosts that can spawn a local stdio process can use the same configuration. After the Getting Started install, the Unix binary is `$HOME/.local/bin/kube-sre-mcp` **in a shell**. MCP clients typically do **not** run through a shell and do **not** expand `$HOME`, so `command` must be a real absolute filesystem path.
+
+Linux:
 
 ```json
 {
   "mcpServers": {
     "kube-sre-mcp": {
-      "command": "/absolute/path/to/kube-sre-mcp",
+      "command": "/home/USERNAME/.local/bin/kube-sre-mcp",
       "env": {
-        "KUBECONFIG": "/absolute/path/to/.kube/config",
+        "KUBECONFIG": "/home/USERNAME/.kube/config",
         "KUBE_SRE_MCP_ACTIONS_ENABLED": "false"
       }
     }
   }
 }
 ```
+
+macOS:
+
+```json
+{
+  "mcpServers": {
+    "kube-sre-mcp": {
+      "command": "/Users/USERNAME/.local/bin/kube-sre-mcp",
+      "env": {
+        "KUBECONFIG": "/Users/USERNAME/.kube/config",
+        "KUBE_SRE_MCP_ACTIONS_ENABLED": "false"
+      }
+    }
+  }
+}
+```
+
+Replace `USERNAME` with your account name.
+
+### Windows
+
+For Windows installation and MCP client configuration, see [docs/windows.md](docs/windows.md).
 
 ## Documentation
 

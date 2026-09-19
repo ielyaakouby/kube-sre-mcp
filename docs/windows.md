@@ -4,12 +4,13 @@ This guide covers **native Windows 10/11** usage of kube-sre-mcp with PowerShell
 Wine is **not** part of the Windows installation procedure. Wine is for
 development or cross-platform testing on non-Windows hosts only.
 
-Official Windows artifact:
+Official Windows artifact (version comes from the Git tag, for example `v0.1.0`):
 
-`kube-sre-mcp-windows-amd64.exe`
+`kube-sre-mcp_<VERSION>_windows_amd64.zip`
 
-That is the recommended binary for modern 64-bit Windows. 32-bit Windows builds
-are not official community release artifacts.
+The ZIP contains `kube-sre-mcp.exe`, `LICENSE`, and `README.md`. That is the
+recommended binary for modern 64-bit Windows. 32-bit Windows builds are not
+official community release artifacts.
 
 ## Requirements
 
@@ -83,19 +84,37 @@ are bound to that context so a second call cannot silently target another cluste
 
 ## Install the binary
 
-1. Download `kube-sre-mcp-windows-amd64.exe` from the GitHub release
-   (`v0.1.0` or later).
+Do not use Unix `$HOME/.local/bin` on Windows.
+
+1. Download `kube-sre-mcp_${VERSION}_windows_amd64.zip` from the GitHub release
+   (set `VERSION` to the tag without the `v` prefix, for example `0.1.0`).
 2. Optionally verify SHA-256 against `checksums.txt` from the same release.
-3. Place it in a directory you control, for example:
+3. Extract the ZIP. The archive contains `kube-sre-mcp.exe`, `LICENSE`, and
+   `README.md`. Place `kube-sre-mcp.exe` in a directory you control, for example:
 
 ```text
-C:\Users\<USERNAME>\kube-sre-mcp\kube-sre-mcp-windows-amd64.exe
+C:\Users\<USERNAME>\kube-sre-mcp\kube-sre-mcp.exe
 ```
+
+Optionally add that directory to your user PATH so `kube-sre-mcp.exe` works
+from any PowerShell session:
+
+```powershell
+$bin = "$env:USERPROFILE\kube-sre-mcp"
+$current = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($current -notlike "*$bin*") {
+  [Environment]::SetEnvironmentVariable("Path", "$current;$bin", "User")
+}
+$env:Path = "$env:Path;$bin"
+```
+
+Open a new terminal after changing the user PATH, or keep the `$env:Path`
+update above for the current session.
 
 Build from source (Go 1.26.6+):
 
 ```powershell
-go build -trimpath -ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=0.1.0" -o kube-sre-mcp-windows-amd64.exe ./cmd/kube-sre-mcp
+go build -trimpath -ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=0.1.0" -o kube-sre-mcp.exe ./cmd/kube-sre-mcp
 ```
 
 ## Test kubectl first
@@ -113,8 +132,14 @@ If kubectl cannot reach the API server, kube-sre-mcp will not either.
 ```powershell
 $env:KUBECONFIG = "C:\Users\<USERNAME>\.kube\config"
 $env:KUBE_SRE_MCP_ACTIONS_ENABLED = "false"
-.\kube-sre-mcp-windows-amd64.exe --version
-.\kube-sre-mcp-windows-amd64.exe --help
+kube-sre-mcp.exe --version
+kube-sre-mcp.exe --help
+```
+
+If the install directory is not on `PATH`, call the absolute path instead:
+
+```powershell
+C:\Users\<USERNAME>\kube-sre-mcp\kube-sre-mcp.exe --version
 ```
 
 Starting the binary without `--version` / `--help` speaks MCP on stdio and will
@@ -134,7 +159,7 @@ backslashes.
 Example command path:
 
 ```text
-C:\\Users\\<USERNAME>\\kube-sre-mcp\\kube-sre-mcp-windows-amd64.exe
+C:\\Users\\<USERNAME>\\kube-sre-mcp\\kube-sre-mcp.exe
 ```
 
 Example `mcpServers` stanza:
@@ -143,7 +168,7 @@ Example `mcpServers` stanza:
 {
   "mcpServers": {
     "kube-sre-mcp": {
-      "command": "C:\\Users\\<USERNAME>\\kube-sre-mcp\\kube-sre-mcp-windows-amd64.exe",
+      "command": "C:\\Users\\<USERNAME>\\kube-sre-mcp\\kube-sre-mcp.exe",
       "env": {
         "KUBECONFIG": "C:\\Users\\<USERNAME>\\.kube\\config",
         "KUBE_SRE_MCP_LOG_LEVEL": "info",

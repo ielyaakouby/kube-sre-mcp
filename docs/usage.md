@@ -9,8 +9,9 @@ Architecture: [architecture.md](architecture.md).
 
 ## Running kube-sre-mcp
 
-Go 1.26.6+ is required **to build from source**. A GitHub Release binary does not
-need a Go toolchain.
+Go 1.26.6+ is required **to build from source**. A GitHub Release archive does not
+need a Go toolchain. Primary install (wget + `$HOME/.local/bin`): root
+[README.md](../README.md#getting-started).
 
 ```bash
 git clone https://github.com/ielyaakouby/kube-sre-mcp.git
@@ -53,17 +54,21 @@ kubeconfig current context is used.
 ## Connecting an MCP Client
 
 Transport is stdio only in v0.1.0. HTTP, SSE, and streamable HTTP are not supported.
-Point the host at the **absolute** binary path.
+Point the host at the **absolute** filesystem path of the binary. After the
+README Getting Started install that is `$HOME/.local/bin/kube-sre-mcp` in a
+shell; MCP clients typically do not expand `$HOME`.
 
 `KUBE_SRE_MCP_CONTEXT` is **optional**. Omit it to use the kubeconfig `current-context`.
+
+Linux:
 
 ```json
 {
   "mcpServers": {
     "kube-sre-mcp": {
-      "command": "/absolute/path/to/kube-sre-mcp",
+      "command": "/home/USERNAME/.local/bin/kube-sre-mcp",
       "env": {
-        "KUBECONFIG": "/home/you/.kube/config",
+        "KUBECONFIG": "/home/USERNAME/.kube/config",
         "KUBE_SRE_MCP_LOG_LEVEL": "info",
         "KUBE_SRE_MCP_ACTIONS_ENABLED": "false"
       }
@@ -71,6 +76,9 @@ Point the host at the **absolute** binary path.
   }
 }
 ```
+
+macOS: use `/Users/USERNAME/.local/bin/kube-sre-mcp` and
+`/Users/USERNAME/.kube/config`. Windows: [windows.md](windows.md).
 
 Do not put cluster tokens in the config file.
 

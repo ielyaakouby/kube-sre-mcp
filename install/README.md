@@ -1,10 +1,10 @@
 # Installation — Kube SRE MCP
 
 Kube SRE MCP is a Go MCP server (stdio). v0.1.0 is local execution with kubeconfig
-authentication. Official artifacts are source and GitHub Release binaries; there
-is no published container image.
+authentication. Official artifacts are source and GitHub Release archives
+(`.tar.gz` / `.zip`); there is no published container image.
 
-**Users:** download a prebuilt binary from
+**Users:** download a prebuilt archive from
 [GitHub Releases](https://github.com/ielyaakouby/kube-sre-mcp/releases).
 Go is not required to run a release binary. See the root [README.md](../README.md).
 

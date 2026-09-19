@@ -43,55 +43,99 @@ jobs:
           make lint
           make test
 
-      - name: Build official release binaries
+      - name: Build official release archives
         env:
           VERSION: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          mkdir -p dist
           VERSION="${VERSION#v}"
           ldflags="-s -w -X github.com/ielyaakouby/kube-sre-mcp/internal/version.Version=${VERSION}"
+          mkdir -p dist/build
+
           build() {
             local goos="$1" goarch="$2" out="$3"
             echo "Building ${out}"
             GOOS="${goos}" GOARCH="${goarch}" CGO_ENABLED=0 \
-              go build -trimpath -ldflags="${ldflags}" -o "dist/${out}" ./cmd/kube-sre-mcp
+              go build -trimpath -ldflags="${ldflags}" -o "dist/build/${out}" ./cmd/kube-sre-mcp
           }
           build linux amd64 kube-sre-mcp-linux-amd64
           build linux arm64 kube-sre-mcp-linux-arm64
           build darwin amd64 kube-sre-mcp-darwin-amd64
           build darwin arm64 kube-sre-mcp-darwin-arm64
           build windows amd64 kube-sre-mcp-windows-amd64.exe
+
+          package_unix() {
+            local goos="$1" goarch="$2"
+            local stage="dist/stage/${goos}_${goarch}"
+            local archive="dist/kube-sre-mcp_${VERSION}_${goos}_${goarch}.tar.gz"
+            mkdir -p "${stage}"
+            install -m 0755 "dist/build/kube-sre-mcp-${goos}-${goarch}" "${stage}/kube-sre-mcp"
+            cp LICENSE README.md "${stage}/"
+            tar -C "${stage}" --owner=0 --group=0 --numeric-owner -czf "${archive}" \
+              kube-sre-mcp LICENSE README.md
+            echo "Packed ${archive}"
+          }
+
+          package_windows() {
+            local stage="dist/stage/windows_amd64"
+            local archive="dist/kube-sre-mcp_${VERSION}_windows_amd64.zip"
+            mkdir -p "${stage}"
+            install -m 0755 "dist/build/kube-sre-mcp-windows-amd64.exe" "${stage}/kube-sre-mcp.exe"
+            cp LICENSE README.md "${stage}/"
+            # -j stores files at the ZIP root (binary, LICENSE, README.md).
+            zip -q -j "${archive}" \
+              "${stage}/kube-sre-mcp.exe" \
+              "${stage}/LICENSE" \
+              "${stage}/README.md"
+            echo "Packed ${archive}"
+          }
+
+          package_unix linux amd64
+          package_unix linux arm64
+          package_unix darwin amd64
+          package_unix darwin arm64
+          package_windows
+
+          rm -rf dist/build dist/stage
+
           (
             cd dist
-            sha256sum kube-sre-mcp-linux-amd64 \
-              kube-sre-mcp-linux-arm64 \
-              kube-sre-mcp-darwin-amd64 \
-              kube-sre-mcp-darwin-arm64 \
-              kube-sre-mcp-windows-amd64.exe > checksums.txt
+            sha256sum \
+              "kube-sre-mcp_${VERSION}_linux_amd64.tar.gz" \
+              "kube-sre-mcp_${VERSION}_linux_arm64.tar.gz" \
+              "kube-sre-mcp_${VERSION}_darwin_amd64.tar.gz" \
+              "kube-sre-mcp_${VERSION}_darwin_arm64.tar.gz" \
+              "kube-sre-mcp_${VERSION}_windows_amd64.zip" \
+              > checksums.txt
           )
 
       # Create a draft, attach every asset, then publish. GitHub immutable
       # releases reject asset uploads after a release is public. The previous
       # softprops/action-gh-release path created the release then uploaded in
       # parallel, which failed with "Error creating asset temp dir".
+      # GitHub still attaches Source code (zip) and Source code (tar.gz).
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           tag="${{ github.ref_name }}"
+          VERSION="${tag#v}"
           assets=(
-            dist/kube-sre-mcp-linux-amd64
-            dist/kube-sre-mcp-linux-arm64
-            dist/kube-sre-mcp-darwin-amd64
-            dist/kube-sre-mcp-darwin-arm64
-            dist/kube-sre-mcp-windows-amd64.exe
+            "dist/kube-sre-mcp_${VERSION}_linux_amd64.tar.gz"
+            "dist/kube-sre-mcp_${VERSION}_linux_arm64.tar.gz"
+            "dist/kube-sre-mcp_${VERSION}_darwin_amd64.tar.gz"
+            "dist/kube-sre-mcp_${VERSION}_darwin_arm64.tar.gz"
+            "dist/kube-sre-mcp_${VERSION}_windows_amd64.zip"
             dist/checksums.txt
           )
           for f in "${assets[@]}"; do
             test -f "$f"
           done
+          if [ -d dist/build ] || [ -d dist/stage ]; then
+            echo "Temporary packaging directories must not be uploaded." >&2
+            exit 1
+          fi
 
           extra=()
           case "$tag" in
