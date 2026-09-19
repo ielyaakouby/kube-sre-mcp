@@ -11,7 +11,7 @@
 
 **Give your AI assistant an SRE that understands your Kubernetes cluster.**
 
-Kube SRE MCP is a Kubernetes troubleshooting and SRE diagnostics [MCP](https://modelcontextprotocol.io/) server, built in Go with `client-go`. Its focus is a **deterministic diagnostic engine**: it collects, normalizes, correlates, and ranks Kubernetes evidence such as status, conditions, Events, logs, dependencies, scheduling signals, storage signals, and optional metrics. The result is ranked diagnostic hypotheses with supporting evidence, impact, visibility, confidence, and recommendations.
+Kube SRE MCP is a Kubernetes troubleshooting and SRE diagnostics [MCP](https://modelcontextprotocol.io/) server, built in Go with `client-go`. Its focus is a **deterministic diagnostic engine**: it collects, normalizes, correlates, and ranks Kubernetes evidence such as status, conditions, Events, logs, dependencies, scheduling signals, storage signals, and optional metrics. The result is a set of ranked diagnostic hypotheses with supporting evidence, confidence, impact, visibility, and recommendations.
 
 There is no embedded LLM. The MCP host selects tools and may interpret or narrate the structured output. Evidence collection, normalization, correlation, and hypothesis ranking run deterministically inside `kube-sre-mcp`.
 
@@ -37,6 +37,10 @@ Observe → Diagnose → Explain → Safely Act
 General-purpose Kubernetes MCP servers provide broad Kubernetes access and operational capabilities.
 
 Kube SRE MCP intentionally focuses on a specialized, deterministic **SRE diagnostic layer**.
+
+Rather than maximizing the number of Kubernetes operations exposed to an AI agent, Kube SRE MCP concentrates on turning Kubernetes signals into structured diagnostic evidence.
+
+**The goal is not to replace `kubectl` or provide generic Kubernetes CRUD.**
 
 **The goal is not to replace `kubectl` or provide generic Kubernetes CRUD.**
 
@@ -72,7 +76,7 @@ It is designed to help answer:
                  Correlate Evidence
                           │
                           ▼
-               Rank Diagnostic
+               Rank Root-Cause
                   Hypotheses
                           │
                           ▼
@@ -127,7 +131,7 @@ Verify the imagePullSecret configuration.
 
 Read-only by default. Write actions require `KUBE_SRE_MCP_ACTIONS_ENABLED=true`.
 
-Guarded actions run authorization and preflight checks, then a two-step confirmation flow. The MCP host must obtain human approval before submitting the confirmation token. Kubernetes RBAC remains the final authorization boundary.
+The server requires a confirmation token before executing guarded actions. MCP hosts should obtain explicit human approval before submitting that token.
 
 [Security](docs/security.md) · [Safe actions](docs/safe-actions.md) · [RBAC](deploy/rbac.md) · [Vulnerability reporting](SECURITY.md)
 
@@ -277,5 +281,3 @@ Report vulnerabilities privately. Do not open a public GitHub issue. See [SECURI
 Kube SRE MCP is licensed under the [Apache License 2.0](LICENSE).
 
 Copyright 2026 The Kube SRE MCP Authors.
-
-Kube SRE MCP is an independent open-source project and is not a CNCF-hosted project.

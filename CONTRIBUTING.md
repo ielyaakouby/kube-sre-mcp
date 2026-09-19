@@ -38,26 +38,34 @@ go run ./cmd/kube-sre-mcp
 ## Validation
 
 ```bash
-make fmt            # gofmt -w
-make check          # gofmt check + go vet + go test ./...
+make fmt            # gofmt -w on all .go files except vendor/
+make check          # fmt-check (gofmt -l .) + go vet + go test ./...
 make test-race      # go test -race ./...
 make license-check  # Apache-2.0 LICENSE text + SPDX on expected files
 ```
 
-Direct equivalents:
+Direct commands (common local usage; not strict Make equivalents):
 
 ```bash
+gofmt -w cmd internal
+go vet ./...
 go test ./...
 go test -race ./...
-go vet ./...
-gofmt -l cmd internal
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint (`gofmt` + `go vet`), tests (including `-race`), a local binary build, `govulncheck ./...`, a non-publishing Docker image build, and license checks on pull requests and on pushes to `main`. Gosec and CodeQL run in dedicated workflows. There is no Docker/GHCR publishing workflow in v1.
+`gofmt -l` only **lists** unformatted files; it does not rewrite them. A CI-style formatting check for `cmd` and `internal`:
 
-Do not add `fmt.Println` / stdout logging on the MCP runtime path. JSON logs belong on **stderr** so stdout stays MCP.
+```bash
+test -z "$(gofmt -l cmd internal)"
+```
 
-Do not commit `bin/`, kubeconfig files, tokens, or Secret material.
+`make fmt` rewrites the whole module (`gofmt -w` on every `.go` file except `vendor/`). `make check` / `make lint` fail if `gofmt -l .` reports any file.
+
+CI (`.github/workflows/ci.yml`) runs lint (`make lint`: `gofmt -l .` + `go vet`), tests (`make test` and `make test-race`), a local binary build, `govulncheck ./...`, a non-publishing Docker image build, and license checks on pull requests and on pushes to `main`. Gosec and CodeQL run in dedicated workflows. There is no Docker/GHCR publishing workflow in v0.1.0.
+
+Do not add `fmt.Println` / stdout logging on the MCP runtime path. JSON logs belong on **stderr** so stdout stays MCP protocol traffic.
+
+Do not commit `bin/`, kubeconfig files, tokens, or Secret material. Secret `.data`, tokens, PEM material, kubeconfigs, and credentials must never be exposed in tool output, logs, tests, or documentation.
 
 ## Project structure
 
@@ -77,7 +85,7 @@ Full layout: [docs/architecture.md](docs/architecture.md). Tool contract: [CATAL
 
 MCP tools are a **public contract**. Clients and prompts depend on names, required fields, and annotations.
 
-Before adding a tool, decide whether the behavior belongs on an **existing** tool (`k8s_diagnose_resource`, `k8s_get_resource`, `k8s_cluster_health`, …). **Discourage tool sprawl.** Eighteen tools is already a large surface; reuse first.
+Keep the MCP tool surface intentionally small. Reuse an existing tool (`k8s_diagnose_resource`, `k8s_get_resource`, `k8s_cluster_health`, …) before introducing a new one.
 
 If a tool change is justified:
 
@@ -154,6 +162,37 @@ Live-cluster tests are optional and must not be required to merge ordinary chang
 | Diagnostic / RCA behavior | [docs/diagnostic-engine.md](docs/diagnostic-engine.md) |
 | Security or action behavior | [docs/security.md](docs/security.md) and/or [docs/safe-actions.md](docs/safe-actions.md) |
 | Process layout, transports, auth mode | [docs/architecture.md](docs/architecture.md) |
+
+## Commit messages
+
+Short, descriptive messages are preferred. Conventional Commits prefixes are optional but useful:
+
+```text
+feat: add node pressure diagnostics
+fix: preserve MCP stdout protocol
+test: add SSAR denial coverage
+docs: update tool catalog
+security: harden action confirmation binding
+```
+
+## Before opening a pull request
+
+Run:
+
+```bash
+make fmt
+make check
+make test-race
+make license-check
+```
+
+If your change affects an MCP tool, also verify that:
+
+* [CATALOG.md](CATALOG.md) matches the registered tool contract.
+* protocol and contract tests cover the change.
+* existing clients remain backward compatible.
+
+If your change affects a mutating action, complete the security checklist in the pull request template.
 
 ## Pull requests
 
