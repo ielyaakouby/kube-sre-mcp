@@ -1,7 +1,7 @@
 # Copyright 2026 The Kube SRE MCP Authors
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.26.6-bookworm AS build
+FROM golang:1.27.0-bookworm AS build
 WORKDIR /src
 ARG VERSION=0.1.0
 COPY go.mod go.sum ./
